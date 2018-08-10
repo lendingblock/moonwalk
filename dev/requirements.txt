@@ -1,0 +1,8 @@
+# required for python 3.6
+dataclasses
+#
+# cryptocurrencies
+pycoin==0.80
+cashaddress==1.0.5
+eth-utils==1.0.3
+pysha3==1.0.2

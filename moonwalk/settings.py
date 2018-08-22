@@ -1,5 +1,4 @@
 import os
-import json
 
 
 cd = os.path.dirname
@@ -23,12 +22,6 @@ ETH_CHAIN_ID = os.environ.get('ETH_CHAIN_ID') or '4'
 BUFFER_ETH_PRIV = os.environ.get('BUFFER_ETH_PRIV')
 LND_CONTRACT_ADDR = os.environ.get('LND_CONTRACT_ADDR')
 USE_TESTNET = (os.environ.get('USE_TESTNET') or '1') == "1"
-
-
-COMPILED_CONTRACT_JSON = os.path.join(ROOT_DIR, 'LendingBlockToken.json')
-
-with open(COMPILED_CONTRACT_JSON) as fp:
-    LND_CONTRACT = json.load(fp)
 
 
 assert BITCOIN_FEE is None or BITCOIN_FEE.isdigit(), \

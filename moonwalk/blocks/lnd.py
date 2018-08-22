@@ -7,7 +7,7 @@ from eth_account.account import Account
 from eth_utils.address import to_checksum_address, is_address
 from eth_hash.auto import keccak
 
-from wallets import settings
+from moonwalk import settings
 
 
 DECIMALS = pow(10, 18)

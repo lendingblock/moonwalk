@@ -1,6 +1,6 @@
 from lbcore.db.order_values import Ccy
 
-from .main import BaseBlock
+from .blocks.main import BaseBlock
 
 
 def get(ccy: Ccy) -> BaseBlock:

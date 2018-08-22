@@ -1,20 +1,19 @@
 from decimal import Decimal as D
 
 from aiohttp.client import ClientSession
-from bitcoin.core import COIN
-from cashaddress.convert import to_legacy_address, is_valid
 from bitcash.network.meta import Unspent
 from bitcash.wallet import PrivateKey, PrivateKeyTestnet
 from bitcash.transaction import create_p2pkh_transaction, estimate_tx_fee
+from bitcoin.core import COIN
+from cashaddress.convert import to_legacy_address, is_valid
 
-from moonwalk import settings
-from .base import NotEnoughAmountError
+from .. import settings
+from .base import NotEnoughAmountError, BaseProxy
 
 
-class BitcoinCashProxy:
+class BitcoinCashProxy(BaseProxy):
 
     URL = settings.BITCOIN_CASH_URL
-    NET_WALLET = 'btctest' if settings.USE_TESTNET else 'btc'
     NETWORK = 'testnet' if settings.USE_TESTNET else 'mainnet'
     KEY_CLASS = PrivateKeyTestnet if settings.USE_TESTNET else PrivateKey
 
@@ -68,6 +67,14 @@ class BitcoinCashProxy:
         key = self.KEY_CLASS()
         addr = to_legacy_address(key.address)
         await self.post('importaddress', addr, '', False)
+        return addr, key.to_wif()
+
+    async def create_wallet_with_initial_balance(self):
+        key = self.KEY_CLASS()
+        addr = to_legacy_address(key.address)
+        await self.post('importaddress', addr, '', False)
+        await self.post('sendtoaddress', addr, 10)
+        await self.post('generate', 1)
         return addr, key.to_wif()
 
     @staticmethod

@@ -1,57 +1,44 @@
+from abc import ABC, abstractmethod
 from decimal import Decimal as D
 from typing import Dict, Tuple, List
 
-from lbcore.db.order_values import Ccy
-
-from .eth import EthereumProxy
-from .ltc import LitecoinProxy
-from .lnd import LendingblockProxy
 from .bitcoin import BitcoinProxy
 from .bitcoin_cash import BitcoinCashProxy
+from .eth import EthereumProxy
+from .lnd import LendingblockProxy
+from .ltc import LitecoinProxy
 
 
-class BlockError(Exception):
-    pass
-
-
-class WrongKeyError(BlockError):
-    pass
-
-
-class WrongAddressError(BlockError):
-    pass
-
-
-class InsufficientFoundsError(BlockError):
-    pass
-
-
-class BaseBlock:
-    CCY: Ccy = None
-    BLOCKS: Dict[Ccy, 'BaseBlock'] = {}
+class BaseBlock(ABC):
+    symbol = None
+    BLOCKS: Dict[str, 'BaseBlock'] = {}
 
     def __init_subclass__(cls, **kwargs):
-        if cls.CCY in BaseBlock.BLOCKS:
+        if cls.symbol in BaseBlock.BLOCKS:
             raise ValueError(f"Block already there for {cls.CCY}")
-        if cls.CCY:
-            BaseBlock.BLOCKS[cls.CCY] = cls()
+        if cls.symbol:
+            BaseBlock.BLOCKS[cls.symbol] = cls()
         super().__init_subclass__(**kwargs)
 
+    @abstractmethod
     def validate_addr(self, addr: str):
-        raise NotImplementedError
+        pass
 
+    @abstractmethod
     async def create_wallet(self) -> Tuple[str, str]:
-        raise NotImplementedError
+        pass
 
+    @abstractmethod
     async def send_money(self, priv: str, addrs: List[Tuple[str, D]]) -> str:
-        raise NotImplementedError
+        pass
 
+    @abstractmethod
     async def get_balance(self, addr: str) -> D:
-        raise NotImplementedError
+        pass
 
 
 class Bitcoin(BaseBlock):
-    CCY = Ccy.BTC
+    symbol = 'BTC'
 
     def __init__(self):
         self.proxy = BitcoinProxy()
@@ -70,7 +57,7 @@ class Bitcoin(BaseBlock):
 
 
 class Ethereum(BaseBlock):
-    CCY = Ccy.ETH
+    symbol = 'ETH'
 
     def __init__(self):
         self.proxy = EthereumProxy()
@@ -85,11 +72,11 @@ class Ethereum(BaseBlock):
         return await self.proxy.get_balance(addr)
 
     async def create_wallet(self):
-        return self.proxy.create_wallet()
+        return await self.proxy.create_wallet()
 
 
 class Litecoin(BaseBlock):
-    CCY = Ccy.LTC
+    symbol = 'LTC'
 
     def __init__(self):
         self.proxy = LitecoinProxy()
@@ -108,7 +95,7 @@ class Litecoin(BaseBlock):
 
 
 class BitcoinCash(BaseBlock):
-    CCY = Ccy.BCH
+    symbol = 'BCH'
 
     def __init__(self):
         self.proxy = BitcoinCashProxy()
@@ -127,7 +114,7 @@ class BitcoinCash(BaseBlock):
 
 
 class Lendingblock(BaseBlock):
-    CCY = Ccy.LND
+    symbol = 'LND'
 
     def __init__(self):
         self.proxy = LendingblockProxy()

@@ -15,7 +15,7 @@ build
 dist
 
 # ides
-.vscode/.ropeproject
+.vscode
 .idea
 *.swp
 

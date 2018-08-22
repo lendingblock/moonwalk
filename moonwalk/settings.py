@@ -1,12 +1,10 @@
 import os
+import json
 
 
 cd = os.path.dirname
 ROOT_DIR = cd(__file__)
 SECRET_KEY = os.environ.get('SECRET_KEY') or 's0secret'
-VAULT_URL = os.environ.get('VAULT_URL')
-VAULT_ROLE_ID = 'wallet-manager'
-VAULT_SECRET_ID = os.environ.get('VAULT_SECRET_ID')
 
 LITECOIN_FEE = os.environ.get('LITECOIN_FEE') or '10'  # satoshi / byte
 LITECOIN_URL = os.environ.get('LITECOIN_URL')
@@ -22,6 +20,14 @@ ETH_CHAIN_ID = os.environ.get('ETH_CHAIN_ID') or '4'
 BUFFER_ETH_PRIV = os.environ.get('BUFFER_ETH_PRIV')
 LND_CONTRACT_ADDR = os.environ.get('LND_CONTRACT_ADDR')
 USE_TESTNET = (os.environ.get('USE_TESTNET') or '1') == "1"
+
+COMPILED_CONTRACT_JSON = os.path.join(ROOT_DIR, 'LendingBlockToken.json')
+
+with open(COMPILED_CONTRACT_JSON) as fp:
+    LND_CONTRACT = json.load(fp)
+
+MAIN_LND_ADDR = os.environ.get('MAIN_LND_ADDR')
+MAIN_LND_PRIV = os.environ.get('MAIN_LND_PRIV')
 
 
 assert BITCOIN_FEE is None or BITCOIN_FEE.isdigit(), \

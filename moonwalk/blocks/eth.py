@@ -5,12 +5,12 @@ from eth_account.account import Account
 from eth_utils.address import is_address
 from eth_utils.currency import to_wei, from_wei
 
-from moonwalk import settings
+from .. import settings
 from .base import EthereumError, NotEnoughAmountError,\
-    ReplacementTransactionError
+    ReplacementTransactionError, BaseProxy
 
 
-class EthereumProxy:
+class EthereumProxy(BaseProxy):
 
     MAX_FEE = 100
     URL = settings.ETH_URL
@@ -136,7 +136,13 @@ class EthereumProxy:
         if is_address(addr):
             return addr
 
-    @staticmethod
-    def create_wallet():
+    async def create_wallet(self):
         account = Account().create()
         return account.address, account.privateKey.hex()
+
+    async def create_wallet_with_initial_balance(self):
+        account = Account().create()
+        addr = account.address
+        priv = account.privateKey.hex()
+        await self.send_money(settings.BUFFER_ETH_PRIV, [(addr, D(100))])
+        return addr, priv

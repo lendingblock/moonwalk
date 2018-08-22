@@ -16,10 +16,10 @@ from pycoin.tx.tx_utils import sign_tx
 from pycoin.ui import standard_tx_out_script
 from pywallet.wallet import create_wallet
 
-from .base import NotEnoughAmountError
+from .base import NotEnoughAmountError, BaseProxy
 
 
-class BitcoinGenericProxy:
+class BitcoinGenericProxy(BaseProxy):
 
     def __init__(self):
         SelectParams(self.NETWORK)
@@ -40,8 +40,14 @@ class BitcoinGenericProxy:
 
     async def create_wallet(self):
         wallet = create_wallet(self.NET_WALLET)
+        return wallet['address'], wallet['wif']
+
+    async def create_wallet_with_initial_balance(self):
+        wallet = create_wallet(self.NET_WALLET)
         addr = wallet['address']
         await self.post('importaddress', addr, '', False)
+        await self.post('sendtoaddress', addr, 10)
+        await self.post('generate', 1)
         return addr, wallet['wif']
 
     async def get_listunspent_for_addr(self, addr, confirmations=1):

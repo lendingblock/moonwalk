@@ -1,7 +1,5 @@
-from lbcore.db.order_values import Ccy
+"""
+Crypto and market utilities
+"""
 
-from .blocks.main import BaseBlock
-
-
-def get(ccy: Ccy) -> BaseBlock:
-    return BaseBlock.BLOCKS[ccy]
+__version__ = '0.1.0'

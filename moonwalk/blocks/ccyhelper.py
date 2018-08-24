@@ -24,14 +24,14 @@ class CcyHelper:
             return is_address_valid(addr) == 'XTN'
         return is_address_valid(addr) == 'LTC'
 
-    @staticmethod
-    def validate_eth(addr):
+    @classmethod
+    def validate_eth(cls, addr):
         return is_address(addr)
 
-    @staticmethod
-    def validate_bch(addr):
+    @classmethod
+    def validate_bch(cls, addr):
         return is_valid(addr)
 
-    @staticmethod
-    def validate_lnd(addr):
+    @classmethod
+    def validate_lnd(cls, addr):
         return is_address(addr)

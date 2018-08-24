@@ -23,9 +23,9 @@ class NotEnoughAmountError(BlockBaseError):
 
 class BaseProxy(ABC):
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def validate_addr(addr):
+    def validate_addr(cls, addr):
         pass
 
     @abstractmethod

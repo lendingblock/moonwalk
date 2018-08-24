@@ -30,8 +30,8 @@ class BitcoinProxy(BitcoinGenericProxy):
                 fatest_fee = resp_dict['fastestFee']
                 return min(self.MAX_FEE, fatest_fee)
 
-    @staticmethod
-    def validate_addr(addr):
+    @classmethod
+    def validate_addr(cls, addr):
         if settings.USE_TESTNET:
             if is_address_valid(addr) == 'XTN':
                 return addr

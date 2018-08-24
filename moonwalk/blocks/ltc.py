@@ -15,8 +15,8 @@ class LitecoinProxy(BitcoinGenericProxy):
         tx_size = self.calculate_tx_size(tx)
         return int(settings.LITECOIN_FEE) * tx_size
 
-    @staticmethod
-    def validate_addr(addr):
+    @classmethod
+    def validate_addr(cls, addr):
         if settings.USE_TESTNET:
             if is_address_valid(addr) == 'XTN':
                 return addr

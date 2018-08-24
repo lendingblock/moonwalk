@@ -131,8 +131,8 @@ class EthereumProxy(BaseProxy):
         balance = await self.get_balance(addr)
         return await self.send_money(priv, [(buffer_addr, balance)])
 
-    @staticmethod
-    def validate_addr(addr):
+    @classmethod
+    def validate_addr(cls, addr):
         if is_address(addr):
             return addr
 

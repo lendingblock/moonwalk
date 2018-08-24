@@ -80,8 +80,8 @@ class BitcoinGenericProxy(BaseProxy):
     def calc_fee(self, tx: Tx) -> D:
         raise NotImplementedError
 
-    @staticmethod
-    def calculate_tx_size(tx: Tx) -> int:
+    @classmethod
+    def calculate_tx_size(cls, tx: Tx) -> int:
         s = io.BytesIO()
         tx.stream(s)
         return len(s.getvalue())

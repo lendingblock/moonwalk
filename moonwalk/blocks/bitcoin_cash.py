@@ -25,8 +25,8 @@ class BitcoinCashProxy(BaseProxy):
             'id': self.NETWORK
         }
 
-    @staticmethod
-    def calc_fee(n_in, n_out):
+    @classmethod
+    def calc_fee(cls, n_in, n_out):
         return estimate_tx_fee(
             n_in,
             n_out,
@@ -77,8 +77,8 @@ class BitcoinCashProxy(BaseProxy):
         await self.post('generate', 1)
         return addr, key.to_wif()
 
-    @staticmethod
-    def normalize_decimal(d):
+    @classmethod
+    def normalize_decimal(cls, d):
         return d.to_integral() if d == d.to_integral() else d.normalize()
 
     async def get_balance(self, addr):
@@ -122,7 +122,7 @@ class BitcoinCashProxy(BaseProxy):
         tx_hex = create_p2pkh_transaction(key, unspent_obj_list, calc_addrs)
         return await self.post('sendrawtransaction', tx_hex)
 
-    @staticmethod
-    def validate_addr(addr):
+    @classmethod
+    def validate_addr(cls, addr):
         if is_valid(addr):
             return to_legacy_address(addr)

@@ -20,18 +20,18 @@ class LendingblockProxy(EthereumProxy):
         if method_sig:
             return '0x' + keccak(method_sig.encode()).hex()[:8]
 
-    @staticmethod
-    def get_addr_hash(addr):
+    @classmethod
+    def get_addr_hash(cls, addr):
         if addr.startswith('0x'):
             return addr.lower()[2:].zfill(64)
         return ''
 
-    @staticmethod
-    def get_amount_hash(num):
+    @classmethod
+    def get_amount_hash(cls, num):
         return hex(int(num * DECIMALS))[2:].zfill(64)
 
-    @staticmethod
-    def get_method_signature(method):
+    @classmethod
+    def get_method_signature(cls, method):
         method_abi_list = [
             x for x in settings.LND_CONTRACT['abi'] if x.get('name') == method
         ]
@@ -96,8 +96,8 @@ class LendingblockProxy(EthereumProxy):
         }, 'latest')
         return D(int(result, 16) / DECIMALS)
 
-    @staticmethod
-    def validate_addr(addr):
+    @classmethod
+    def validate_addr(cls, addr):
         if is_address(addr):
             return addr
 

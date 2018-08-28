@@ -55,7 +55,7 @@ class LendingblockProxy(EthereumProxy):
         to_int=False,
         to_string=False,
     ):
-        contract_address = self.get_contract_addr()
+        contract_address = settings.LND_CONTRACT_ADDR
         result = await self.post('eth_call', {
             'to': to_checksum_address(contract_address),
             'data': self.get_method_hash(method)

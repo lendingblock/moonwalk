@@ -43,7 +43,9 @@ class BitcoinGenericProxy(BaseProxy):
 
     async def create_wallet(self):
         wallet = create_wallet(self.NET_WALLET)
-        return wallet['address'], wallet['wif']
+        addr = wallet['address']
+        await self.post('importaddress', addr, '', False)
+        return addr, wallet['wif']
 
     async def create_wallet_with_initial_balance(self):
         wallet = create_wallet(self.NET_WALLET)

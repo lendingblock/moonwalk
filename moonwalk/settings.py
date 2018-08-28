@@ -1,6 +1,10 @@
 import os
 import json
 
+import dotenv
+
+
+dotenv.load_dotenv()
 
 cd = os.path.dirname
 ROOT_DIR = cd(__file__)
@@ -28,6 +32,8 @@ with open(COMPILED_CONTRACT_JSON) as fp:
 
 MAIN_LND_ADDR = os.environ.get('MAIN_LND_ADDR')
 MAIN_LND_PRIV = os.environ.get('MAIN_LND_PRIV')
+MAIN_ETH_ADDR = os.environ.get('MAIN_ETH_ADDR')
+MAIN_ETH_PRIV = os.environ.get('MAIN_ETH_PRIV')
 
 
 assert BITCOIN_FEE is None or BITCOIN_FEE.isdigit(), \

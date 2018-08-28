@@ -16,9 +16,6 @@ jobs:
           name: flake8
           command: flake8
       - run:
-          name: port listen
-          command: sudo ss -tlpn
-      - run:
           name: docker containers
           command: sudo docker ps -a
       - run:

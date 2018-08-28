@@ -49,7 +49,12 @@ class LendingblockProxy(EthereumProxy):
         method_sig += ')'
         return method_sig
 
-    async def call_contract_method(self, method, to_int=False, to_string=False):
+    async def call_contract_method(
+        self,
+        method,
+        to_int=False,
+        to_string=False,
+    ):
         contract_address = self.get_contract_addr()
         result = await self.post('eth_call', {
             'to': to_checksum_address(contract_address),

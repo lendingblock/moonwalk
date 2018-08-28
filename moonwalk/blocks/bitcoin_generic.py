@@ -34,7 +34,10 @@ class BitcoinGenericProxy(BaseProxy):
 
     async def post(self, *args):
         async with ClientSession() as session:
-            async with session.post(self.URL, json=self.get_data(*args)) as res:
+            async with session.post(
+                self.URL,
+                json=self.get_data(*args),
+            ) as res:
                 resp_dict = await res.json()
                 return resp_dict['result']
 
@@ -97,7 +100,7 @@ class BitcoinGenericProxy(BaseProxy):
         as a change.
 
         :param priv: WIF private key of sender -> str
-        :param addrs: list of tuples -> [(addr1, amount1), (addr2, amount2),...]
+        :param addrs: list of tuples -> [(addr1, amount1), (addr2, amount2),..]
         :return: transaction id -> str
         """
         addr = Key.from_text(priv).address()

@@ -1,5 +1,6 @@
 # required for python 3.6
 dataclasses
+python-dotenv==0.9.1
 #
 # cryptocurrencies
 pycoin==0.80

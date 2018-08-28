@@ -2,15 +2,11 @@ import asyncio
 import os
 
 import pytest
-import uvloop
 from eth_utils.currency import to_wei
 from eth_utils.address import to_checksum_address
 
 from moonwalk.blocks.eth import EthereumProxy
 from moonwalk import settings
-
-
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
 class EthHelper:

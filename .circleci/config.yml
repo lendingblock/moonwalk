@@ -1,19 +1,24 @@
 version: 2
 jobs:
   build:
-    docker:
-      - image: circleci/python:3.6
+    machine: true
     steps:
       - checkout
-      - setup_remote_docker
-      - run: sudo pip install docker-compose
-      - run: sudo docker-compose up -d
+      - run: pyenv install 3.6.3 && pyenv global 3.6.3
+      - run: pip install docker-compose
+      - run: docker-compose up -d 
       - run:
           name: install
           command: sudo ./dev/install.sh
       - run:
           name: flake8
           command: flake8
+      - run:
+          name: port listen
+          command: sudo ss -tlpn
+      - run:
+          name: docker containers
+          command: sudo docker ps -a
       - run:
           name: test
           command: pytest --cov

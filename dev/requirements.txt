@@ -1,8 +1,15 @@
 # required for python 3.6
 dataclasses
+python-dotenv==0.9.1
 #
 # cryptocurrencies
-pycoin==0.80
 cashaddress==1.0.5
 eth-utils==1.0.3
+eth-abi==1.1.1
+eth-account==0.3.0
 pysha3==1.0.2
+pywallet==0.0.7
+python-bitcoinlib==0.10.1
+pycoin==0.80
+bitcash==0.5.2
+rlp==0.6.0

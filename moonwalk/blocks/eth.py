@@ -5,16 +5,19 @@ from eth_account.account import Account
 from eth_utils.address import is_address
 from eth_utils.currency import to_wei, from_wei
 
-from .. import settings
-from .base import EthereumError, NotEnoughAmountError,\
-    ReplacementTransactionError, BaseProxy
+from moonwalk import settings
+from .fee import FeeStation
+from .exc import (
+    EthereumError,
+    NotEnoughAmountError,
+    ReplacementTransactionError,
+)
 
 
-class EthereumProxy(BaseProxy):
+class EthereumProxy:
 
     MAX_FEE = 100
     URL = settings.ETH_URL
-    FEE_URL = 'https://ethgasstation.info/json/ethgasAPI.json'
     NETWORK = 'testnet' if settings.USE_TESTNET else 'mainnet'
 
     def get_data(self, method, *params):
@@ -27,10 +30,7 @@ class EthereumProxy(BaseProxy):
 
     async def post(self, *args):
         async with ClientSession() as session:
-            async with session.post(
-                self.URL,
-                json=self.get_data(*args),
-            ) as res:
+            async with session.post(self.URL, json=self.get_data(*args)) as res:
                 resp_dict = await res.json()
                 result = resp_dict.get('result')
                 error = resp_dict.get('error')
@@ -43,14 +43,9 @@ class EthereumProxy(BaseProxy):
 
     async def get_gas_price(self) -> int:
         if not settings.ETH_FEE:
-            async with ClientSession() as session:
-                async with session.get(self.FEE_URL) as res:
-                    resp_dict = await res.json()
-                    average = int(resp_dict['average'] / 10)
-                    return to_wei(
-                        int(min(self.MAX_FEE, average)),
-                        'gwei',
-                    )
+            fee_station = FeeStation('eth')
+            transaction_fee = await fee_station.get_fee()
+            return min(self.MAX_FEE, transaction_fee)
         return to_wei(int(settings.ETH_FEE), 'gwei')
 
     async def get_balance(self, addr):
@@ -113,11 +108,7 @@ class EthereumProxy(BaseProxy):
             raise NotEnoughAmountError()
 
     async def get_transaction_count(self, addr_from):
-        nonce = await self.post(
-            'eth_getTransactionCount',
-            addr_from,
-            'pending',
-        )
+        nonce = await self.post('eth_getTransactionCount', addr_from, 'pending')
         return int(nonce, 16)
 
     async def send_money(self, priv, addrs):
@@ -138,18 +129,12 @@ class EthereumProxy(BaseProxy):
         balance = await self.get_balance(addr)
         return await self.send_money(priv, [(buffer_addr, balance)])
 
-    @classmethod
-    def validate_addr(cls, addr):
+    @staticmethod
+    def validate_addr(addr):
         if is_address(addr):
             return addr
 
-    async def create_wallet(self):
+    @staticmethod
+    def create_wallet():
         account = Account().create()
         return account.address, account.privateKey.hex()
-
-    async def create_wallet_with_initial_balance(self):
-        account = Account().create()
-        addr = account.address
-        priv = account.privateKey.hex()
-        await self.send_money(settings.BUFFER_ETH_PRIV, [(addr, D(100))])
-        return addr, priv

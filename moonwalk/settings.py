@@ -1,14 +1,13 @@
 import os
 import json
 
-import dotenv
-
-
-dotenv.load_dotenv()
 
 cd = os.path.dirname
 ROOT_DIR = cd(__file__)
 SECRET_KEY = os.environ.get('SECRET_KEY') or 's0secret'
+VAULT_URL = os.environ.get('VAULT_URL')
+VAULT_ROLE_ID = 'wallet-manager'
+VAULT_SECRET_ID = os.environ.get('VAULT_SECRET_ID')
 
 LITECOIN_FEE = os.environ.get('LITECOIN_FEE') or '10'  # satoshi / byte
 LITECOIN_URL = os.environ.get('LITECOIN_URL')
@@ -22,18 +21,16 @@ ETH_URL = os.environ.get('ETH_URL')
 ETH_CHAIN_ID = os.environ.get('ETH_CHAIN_ID') or '4'
 
 BUFFER_ETH_PRIV = os.environ.get('BUFFER_ETH_PRIV')
+LND_WALLETS_TOPUP_TRANS_NO = os.environ.get('LND_WALLETS_TOPUP_TRANS_NO') or '10'
 LND_CONTRACT_ADDR = os.environ.get('LND_CONTRACT_ADDR')
 USE_TESTNET = (os.environ.get('USE_TESTNET') or '1') == "1"
+FEE_CACHE_TIME = (os.environ.get('FEE_CACHE_TIME') or '10')
+
 
 COMPILED_CONTRACT_JSON = os.path.join(ROOT_DIR, 'LendingBlockToken.json')
 
 with open(COMPILED_CONTRACT_JSON) as fp:
     LND_CONTRACT = json.load(fp)
-
-MAIN_LND_ADDR = os.environ.get('MAIN_LND_ADDR')
-MAIN_LND_PRIV = os.environ.get('MAIN_LND_PRIV')
-MAIN_ETH_ADDR = os.environ.get('MAIN_ETH_ADDR')
-MAIN_ETH_PRIV = os.environ.get('MAIN_ETH_PRIV')
 
 
 assert BITCOIN_FEE is None or BITCOIN_FEE.isdigit(), \
@@ -42,3 +39,4 @@ assert ETH_FEE is None or ETH_FEE.isdigit(), \
     'ETH_FEE must be None or an integer'
 assert BITCOIN_CASH_FEE.isdigit(), 'BITCOIN_CASH_FEE must be an integer'
 assert LITECOIN_FEE.isdigit(), 'LITECOIN_FEE must be an integer'
+assert FEE_CACHE_TIME.isdigit(), 'FEE_CACHE_TIME must be an integer'

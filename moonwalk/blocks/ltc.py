@@ -1,7 +1,7 @@
 from pycoin.tx.Tx import Tx
 from pycoin.key.validate import is_address_valid
 
-from .. import settings
+from moonwalk import settings
 from .bitcoin_generic import BitcoinGenericProxy
 
 
@@ -16,8 +16,8 @@ class LitecoinProxy(BitcoinGenericProxy):
         tx_size = self.calculate_tx_size(tx)
         return int(settings.LITECOIN_FEE) * tx_size
 
-    @classmethod
-    def validate_addr(cls, addr):
+    @staticmethod
+    def validate_addr(addr):
         if settings.USE_TESTNET:
             if is_address_valid(addr) == 'XTN':
                 return addr

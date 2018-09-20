@@ -1,6 +1,6 @@
 from decimal import Decimal as D
 
-from eth_account.account import Account
+from eth_account import Account
 
 from moonwalk.blocks.main import Lendingblock
 
@@ -62,6 +62,12 @@ async def test_lnd(eth_helper, lnd_helper, fee_mocker):
     assert await lnd.send_money(priv1, [(addr3, D(400))])
     assert await lnd.get_balance(addr1) == D(1000 - 400)
     assert await lnd.get_balance(addr3) == D(400)
+
+
+async def test_get_contract_addr(mocker):
+    mocker.patch('moonwalk.settings.LND_CONTRACT_ADDR', '123')
+    lnd = Lendingblock()
+    assert lnd.proxy.get_contract_addr() == '123'
 
 
 async def test_get_addr_hash():

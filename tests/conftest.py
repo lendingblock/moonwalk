@@ -1,27 +1,11 @@
-import os
-import collections
 import asyncio
+import os
 
 import dotenv
-
-
-os.environ['SECRET_KEY'] = "s0secret"  # noqa
-os.environ.setdefault('BITCOIN_URL', 'http://test:test@localhost:18443')
-os.environ.setdefault('LITECOIN_URL', 'http://test:test@localhost:19332')
-os.environ.setdefault('BITCOIN_CASH_URL', 'http://test:test@localhost:18332')
-os.environ.setdefault('ETH_URL', 'http://localhost:8545')
-os.environ.setdefault('ETH_CHAIN_ID', '1')
-os.environ.setdefault('VAULT_URL', 'http://localhost:8200')
-os.environ.setdefault('VAULT_SECRET_ID', 'vault-test')
-os.environ.setdefault(
-    'BUFFER_ETH_PRIV',
-    '0x869844d42d74171d1c5e71ecd8964118e68f610af94047fd1e98afb4df1c5e1b'
-)
 
 dotenv.load_dotenv('.test.env')  # noqa
 
 import pytest
-
 import uvloop
 
 from moonwalk.blocks.eth import EthereumProxy

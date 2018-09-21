@@ -21,7 +21,7 @@ ETH_URL = os.environ.get('ETH_URL')
 ETH_CHAIN_ID = os.environ.get('ETH_CHAIN_ID') or '4'
 
 BUFFER_ETH_PRIV = os.environ.get('BUFFER_ETH_PRIV')
-LND_WALLETS_TOPUP_TRANS_NO = os.environ.get('LND_WALLETS_TOPUP_TRANS_NO') or '10'
+LND_WALLETS_TOPUP_TRANS_NO = os.environ.get('LND_WALLETS_TOPUP_TRANS_NO', '10')
 LND_CONTRACT_ADDR = os.environ.get('LND_CONTRACT_ADDR')
 USE_TESTNET = (os.environ.get('USE_TESTNET') or '1') == "1"
 FEE_CACHE_TIME = (os.environ.get('FEE_CACHE_TIME') or '10')

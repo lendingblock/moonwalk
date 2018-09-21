@@ -29,8 +29,8 @@ class EthereumProxy:
         }
 
     async def post(self, *args):
-        async with ClientSession() as session:
-            async with session.post(self.URL, json=self.get_data(*args)) as res:
+        async with ClientSession() as sess:
+            async with sess.post(self.URL, json=self.get_data(*args)) as res:
                 resp_dict = await res.json()
                 result = resp_dict.get('result')
                 error = resp_dict.get('error')
@@ -108,7 +108,8 @@ class EthereumProxy:
             raise NotEnoughAmountError()
 
     async def get_transaction_count(self, addr_from):
-        nonce = await self.post('eth_getTransactionCount', addr_from, 'pending')
+        nonce = await self.post('eth_getTransactionCount', addr_from,
+                                'pending')
         return int(nonce, 16)
 
     async def send_money(self, priv, addrs):

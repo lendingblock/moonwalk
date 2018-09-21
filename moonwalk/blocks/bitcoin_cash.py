@@ -36,8 +36,8 @@ class BitcoinCashProxy:
         )
 
     async def post(self, *args):
-        async with ClientSession() as session:
-            async with session.post(self.URL, json=self.get_data(*args)) as res:
+        async with ClientSession() as sess:
+            async with sess.post(self.URL, json=self.get_data(*args)) as res:
                 resp_dict = await res.json()
                 return resp_dict['result']
 

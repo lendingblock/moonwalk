@@ -37,8 +37,8 @@ class BitcoinGenericProxy:
         }
 
     async def post(self, *args):
-        async with ClientSession() as session:
-            async with session.post(self.URL, json=self.get_data(*args)) as res:
+        async with ClientSession() as sess:
+            async with sess.post(self.URL, json=self.get_data(*args)) as res:
                 resp_dict = await res.json()
                 return resp_dict['result']
 
@@ -90,12 +90,12 @@ class BitcoinGenericProxy:
         addrs: List[Tuple[str, D]],
     ) -> str:
         """
-        We distribute fee equaly on every recipient by reducing the amount
+        We distribute fee equally on every recipient by reducing the amount
         of money they will receive. The rest will go back to the sender
         as a change.
 
         :param priv: WIF private key of sender -> str
-        :param addrs: list of tuples -> [(addr1, amount1), (addr2, amount2),...]
+        :param addrs: distribution -> [(addr1, amount1), (addr2, amount2),...]
         :return: transaction id -> str
         """
         addr = Key.from_text(priv).address()

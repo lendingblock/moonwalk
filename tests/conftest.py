@@ -1,5 +1,4 @@
 import asyncio
-import os
 
 import dotenv
 
@@ -17,16 +16,15 @@ from eth_utils.address import to_checksum_address
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
-class EthHelper:
-
+class GenericEthHelper:
     MAIN_ADDR = to_checksum_address(
         '0x4a6a0f44e165bb2dc9afbc7574f82d2388a52638')
-    MAIN_PRIV_KEY = \
-        '0x869844d42d74171d1c5e71ecd8964118e68f610af94047fd1e98afb4df1c5e1b'
 
     def __init__(self):
         self.proxy = EthereumProxy()
 
+
+class EthHelper(GenericEthHelper):
     async def send_money(self, addr, amount):
         nonce = await self.proxy.post(
             'eth_getTransactionCount',
@@ -44,19 +42,7 @@ class EthHelper:
         return await self.proxy.post('eth_sendTransaction', tx)
 
 
-class LndHelper:
-
-    MAIN_ADDR = to_checksum_address(
-        '0x4a6a0f44e165bb2dc9afbc7574f82d2388a52638')
-    MAIN_PRIV_KEY = \
-        '0x869844d42d74171d1c5e71ecd8964118e68f610af94047fd1e98afb4df1c5e1b'
-    cd = os.path.dirname
-    FIXTURE_DIR = os.path.join(cd(cd(__file__)), 'fixtures')
-    COMPILED_CONTRACT_JSON = os.path.join(FIXTURE_DIR, 'LendingBlockToken.json')
-
-    def __init__(self):
-        self.proxy = EthereumProxy()
-
+class LndHelper(GenericEthHelper):
     async def create_contract(self):
         tx_hash = await self.proxy.post('eth_sendTransaction', {
             'from': self.MAIN_ADDR,

@@ -1,6 +1,7 @@
 from decimal import Decimal as D
 
 from bitcoin.core import COIN
+
 from moonwalk.blocks.main import Litecoin
 
 

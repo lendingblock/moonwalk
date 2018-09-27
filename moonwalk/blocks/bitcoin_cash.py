@@ -1,19 +1,20 @@
 from decimal import Decimal as D
 
 from aiohttp.client import ClientSession
+from bitcoin.core import COIN
+from cashaddress.convert import to_legacy_address, is_valid
 from bitcash.network.meta import Unspent
 from bitcash.wallet import PrivateKey, PrivateKeyTestnet
 from bitcash.transaction import create_p2pkh_transaction, estimate_tx_fee
-from bitcoin.core import COIN
-from cashaddress.convert import to_legacy_address, is_valid
 
-from .. import settings
-from .base import NotEnoughAmountError, BaseProxy
+from moonwalk import settings
+from .exc import NotEnoughAmountError
 
 
-class BitcoinCashProxy(BaseProxy):
+class BitcoinCashProxy:
 
     URL = settings.BITCOIN_CASH_URL
+    NET_WALLET = 'btctest' if settings.USE_TESTNET else 'btc'
     NETWORK = 'testnet' if settings.USE_TESTNET else 'mainnet'
     KEY_CLASS = PrivateKeyTestnet if settings.USE_TESTNET else PrivateKey
 
@@ -25,8 +26,8 @@ class BitcoinCashProxy(BaseProxy):
             'id': self.NETWORK
         }
 
-    @classmethod
-    def calc_fee(cls, n_in, n_out):
+    @staticmethod
+    def calc_fee(n_in, n_out):
         return estimate_tx_fee(
             n_in,
             n_out,
@@ -35,11 +36,8 @@ class BitcoinCashProxy(BaseProxy):
         )
 
     async def post(self, *args):
-        async with ClientSession() as session:
-            async with session.post(
-                self.URL,
-                json=self.get_data(*args),
-            ) as res:
+        async with ClientSession() as sess:
+            async with sess.post(self.URL, json=self.get_data(*args)) as res:
                 resp_dict = await res.json()
                 return resp_dict['result']
 
@@ -72,16 +70,8 @@ class BitcoinCashProxy(BaseProxy):
         await self.post('importaddress', addr, '', False)
         return addr, key.to_wif()
 
-    async def create_wallet_with_initial_balance(self):
-        key = self.KEY_CLASS()
-        addr = to_legacy_address(key.address)
-        await self.post('importaddress', addr, '', False)
-        await self.post('sendtoaddress', addr, 10)
-        await self.post('generate', 1)
-        return addr, key.to_wif()
-
-    @classmethod
-    def normalize_decimal(cls, d):
+    @staticmethod
+    def normalize_decimal(d):
         return d.to_integral() if d == d.to_integral() else d.normalize()
 
     async def get_balance(self, addr):
@@ -125,7 +115,7 @@ class BitcoinCashProxy(BaseProxy):
         tx_hex = create_p2pkh_transaction(key, unspent_obj_list, calc_addrs)
         return await self.post('sendrawtransaction', tx_hex)
 
-    @classmethod
-    def validate_addr(cls, addr):
+    @staticmethod
+    def validate_addr(addr):
         if is_valid(addr):
             return to_legacy_address(addr)

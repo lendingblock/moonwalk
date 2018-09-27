@@ -16,10 +16,14 @@ from pycoin.tx.tx_utils import sign_tx
 from pycoin.ui import standard_tx_out_script
 from pywallet.wallet import create_wallet
 
-from .base import NotEnoughAmountError, BaseProxy
+from .exc import NotEnoughAmountError
 
 
-class BitcoinGenericProxy(BaseProxy):
+class BitcoinGenericProxy:
+    NETWORK = None
+    URL = None
+    NET_WALLET = None
+    NETCODE = None
 
     def __init__(self):
         SelectParams(self.NETWORK)
@@ -33,11 +37,8 @@ class BitcoinGenericProxy(BaseProxy):
         }
 
     async def post(self, *args):
-        async with ClientSession() as session:
-            async with session.post(
-                self.URL,
-                json=self.get_data(*args),
-            ) as res:
+        async with ClientSession() as sess:
+            async with sess.post(self.URL, json=self.get_data(*args)) as res:
                 resp_dict = await res.json()
                 return resp_dict['result']
 
@@ -45,14 +46,6 @@ class BitcoinGenericProxy(BaseProxy):
         wallet = create_wallet(self.NET_WALLET)
         addr = wallet['address']
         await self.post('importaddress', addr, '', False)
-        return addr, wallet['wif']
-
-    async def create_wallet_with_initial_balance(self):
-        wallet = create_wallet(self.NET_WALLET)
-        addr = wallet['address']
-        await self.post('importaddress', addr, '', False)
-        await self.post('sendtoaddress', addr, 10)
-        await self.post('generate', 1)
         return addr, wallet['wif']
 
     async def get_listunspent_for_addr(self, addr, confirmations=1):
@@ -85,8 +78,8 @@ class BitcoinGenericProxy(BaseProxy):
     def calc_fee(self, tx: Tx) -> D:
         raise NotImplementedError
 
-    @classmethod
-    def calculate_tx_size(cls, tx: Tx) -> int:
+    @staticmethod
+    def calculate_tx_size(tx: Tx) -> int:
         s = io.BytesIO()
         tx.stream(s)
         return len(s.getvalue())
@@ -97,12 +90,12 @@ class BitcoinGenericProxy(BaseProxy):
         addrs: List[Tuple[str, D]],
     ) -> str:
         """
-        We distribute fee equaly on every recipient by reducing the amount
+        We distribute fee equally on every recipient by reducing the amount
         of money they will receive. The rest will go back to the sender
         as a change.
 
         :param priv: WIF private key of sender -> str
-        :param addrs: list of tuples -> [(addr1, amount1), (addr2, amount2),..]
+        :param addrs: distribution -> [(addr1, amount1), (addr2, amount2),...]
         :return: transaction id -> str
         """
         addr = Key.from_text(priv).address()

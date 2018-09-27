@@ -1,44 +1,97 @@
-from abc import ABC, abstractmethod
 from decimal import Decimal as D
 from typing import Dict, Tuple, List
 
-from .bitcoin import BitcoinProxy
-from .bitcoin_cash import BitcoinCashProxy
-from .eth import EthereumProxy
-from .lnd import LendingblockProxy
-from .ltc import LitecoinProxy
+from moonwalk import utils
+from moonwalk.blocks.eth import EthereumProxy
+from moonwalk.blocks.ltc import LitecoinProxy
+from moonwalk.blocks.lnd import LendingblockProxy
+from moonwalk.blocks.bitcoin import BitcoinProxy
+from moonwalk.blocks.bitcoin_cash import BitcoinCashProxy
 
 
-class BaseBlock(ABC):
-    symbol = None
+class BlockError(Exception):
+    pass
+
+
+class WrongKeyError(BlockError):
+    pass
+
+
+class WrongAddressError(BlockError):
+    pass
+
+
+class InsufficientFoundsError(BlockError):
+    pass
+
+
+class BaseBlock:
+    CCY: str = None
     BLOCKS: Dict[str, 'BaseBlock'] = {}
 
     def __init_subclass__(cls, **kwargs):
-        if cls.symbol in BaseBlock.BLOCKS:
+        if cls.CCY in BaseBlock.BLOCKS:
             raise ValueError(f"Block already there for {cls.CCY}")
-        if cls.symbol:
-            BaseBlock.BLOCKS[cls.symbol] = cls()
+        if cls.CCY:
+            BaseBlock.BLOCKS[cls.CCY] = cls()
         super().__init_subclass__(**kwargs)
 
-    @abstractmethod
     def validate_addr(self, addr: str):
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     async def create_wallet(self) -> Tuple[str, str]:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     async def send_money(self, priv: str, addrs: List[Tuple[str, D]]) -> str:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     async def get_balance(self, addr: str) -> D:
-        pass
+        raise NotImplementedError
+
+
+class Dummycoin(BaseBlock):
+    """used in tests"""
+    ADDRESSES = {}
+    PRIV_KEYS = {}
+
+    def validate_addr(self, addr):
+        if addr in self.ADDRESSES:
+            return addr
+
+    async def create_wallet(self):
+        addr = utils.rand_str()
+        priv_key = f'1_{addr}'
+        self.ADDRESSES[addr] = D(0)
+        self.PRIV_KEYS[priv_key] = addr
+        return addr, priv_key
+
+    async def send_money(self, priv, addrs):
+        for addr, amount in addrs:
+            if not self.validate_addr(addr):
+                raise WrongAddressError(addr)
+
+        wallet_addr = priv[2:]
+        balance = self.ADDRESSES[wallet_addr]
+
+        sum_amounts = sum(addr[1] for addr in addrs)
+
+        if balance < sum_amounts:
+            raise InsufficientFoundsError(str(balance))
+
+        self.ADDRESSES[wallet_addr] -= sum_amounts
+        for addr, amount in addrs:
+            self.ADDRESSES[addr] += amount
+
+        return utils.rand_str()
+
+    async def get_balance(self, addr):
+        if addr not in self.ADDRESSES:
+            raise WrongAddressError(addr)
+        return self.ADDRESSES[addr]
 
 
 class Bitcoin(BaseBlock):
-    symbol = 'BTC'
+    CCY = 'BTC'
 
     def __init__(self):
         self.proxy = BitcoinProxy()
@@ -57,7 +110,7 @@ class Bitcoin(BaseBlock):
 
 
 class Ethereum(BaseBlock):
-    symbol = 'ETH'
+    CCY = 'ETH'
 
     def __init__(self):
         self.proxy = EthereumProxy()
@@ -72,11 +125,11 @@ class Ethereum(BaseBlock):
         return await self.proxy.get_balance(addr)
 
     async def create_wallet(self):
-        return await self.proxy.create_wallet()
+        return self.proxy.create_wallet()
 
 
 class Litecoin(BaseBlock):
-    symbol = 'LTC'
+    CCY = 'LTC'
 
     def __init__(self):
         self.proxy = LitecoinProxy()
@@ -95,7 +148,7 @@ class Litecoin(BaseBlock):
 
 
 class BitcoinCash(BaseBlock):
-    symbol = 'BCH'
+    CCY = 'BCH'
 
     def __init__(self):
         self.proxy = BitcoinCashProxy()
@@ -114,7 +167,7 @@ class BitcoinCash(BaseBlock):
 
 
 class Lendingblock(BaseBlock):
-    symbol = 'LND'
+    CCY = 'LND'
 
     def __init__(self):
         self.proxy = LendingblockProxy()

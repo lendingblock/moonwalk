@@ -1,26 +1,37 @@
 import asyncio
-import os
+
+import dotenv
+
+dotenv.load_dotenv('.test.env')  # noqa
 
 import pytest
-from eth_utils.currency import to_wei
-from eth_utils.address import to_checksum_address
+import uvloop
 
 from moonwalk.blocks.eth import EthereumProxy
 from moonwalk import settings
 
+from eth_utils.currency import to_wei
+from eth_utils.address import to_checksum_address
 
-class EthHelper:
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+
+class GenericEthHelper:
+    MAIN_ADDR = to_checksum_address(
+        '0x4a6a0f44e165bb2dc9afbc7574f82d2388a52638')
 
     def __init__(self):
         self.proxy = EthereumProxy()
 
+
+class EthHelper(GenericEthHelper):
     async def send_money(self, addr, amount):
         nonce = await self.proxy.post(
             'eth_getTransactionCount',
-            to_checksum_address(settings.MAIN_ETH_ADDR),
+            self.MAIN_ADDR,
         )
         tx = {
-            'from': settings.MAIN_ETH_ADDR,
+            'from': self.MAIN_ADDR,
             'to': addr,
             'value': to_wei(amount, 'ether'),
             'gas': 22000,
@@ -31,21 +42,10 @@ class EthHelper:
         return await self.proxy.post('eth_sendTransaction', tx)
 
 
-class LndHelper:
-
-    cd = os.path.dirname
-    FIXTURE_DIR = os.path.join(cd(cd(__file__)), 'fixtures')
-    COMPILED_CONTRACT_JSON = os.path.join(
-        FIXTURE_DIR,
-        'LendingBlockToken.json',
-    )
-
-    def __init__(self):
-        self.proxy = EthereumProxy()
-
+class LndHelper(GenericEthHelper):
     async def create_contract(self):
         tx_hash = await self.proxy.post('eth_sendTransaction', {
-            'from': to_checksum_address(settings.MAIN_LND_ADDR),
+            'from': self.MAIN_ADDR,
             'gas': 4000000,
             'gasPrice': 100,
             'data': settings.LND_CONTRACT['bytecode'],
@@ -74,7 +74,10 @@ def eth_helper():
 async def lnd_helper(mocker):
     lnd_helper = LndHelper()
     contract_addr = await lnd_helper.create_contract()
-    mocker.patch('moonwalk.settings.LND_CONTRACT_ADDR', contract_addr)
+    mocker.patch(
+        'moonwalk.blocks.lnd.LendingblockProxy.get_contract_addr',
+        lambda self: contract_addr,
+    )
     yield lnd_helper
 
 

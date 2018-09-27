@@ -1,13 +1,10 @@
 from decimal import Decimal as D
 
 import pytest
+from eth_utils import to_checksum_address, from_wei
 
-from moonwalk import settings
 from moonwalk.blocks.main import Ethereum
-from moonwalk.blocks.base import NotEnoughAmountError
-
-from eth_utils.address import to_checksum_address
-from eth_utils.currency import from_wei
+from moonwalk.blocks.exc import NotEnoughAmountError
 
 
 async def test_not_enough_amount(eth_helper):
@@ -69,7 +66,7 @@ async def test_send_money_contract(eth_helper, fee_mocker):
 
     # deploy a simple contract that accepts eth
     tx_hash = await eth_helper.proxy.post('eth_sendTransaction', {
-        'from': settings.MAIN_ETH_ADDR,
+        'from': eth_helper.MAIN_ADDR,
         'gas': 4000000,
         'gasPrice': 20,
         'data': (

@@ -5,7 +5,7 @@ from bitcoin.core import COIN
 from cashaddress.convert import to_cash_address
 
 from moonwalk.blocks.main import BitcoinCash
-from moonwalk.blocks.base import NotEnoughAmountError
+from moonwalk.blocks.exc import NotEnoughAmountError
 
 
 async def test_basic_bitcoin_cash_ops(fee_mocker):

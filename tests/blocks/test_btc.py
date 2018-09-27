@@ -4,7 +4,7 @@ import pytest
 from bitcoin.core import COIN
 
 from moonwalk.blocks.main import Bitcoin
-from moonwalk.blocks.base import NotEnoughAmountError
+from moonwalk.blocks.exc import NotEnoughAmountError
 
 
 async def test_basic_bitcoin_ops(fee_mocker):

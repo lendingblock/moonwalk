@@ -1,7 +1,7 @@
 import re
 
 import eth_utils
-from eth_account.account import Account
+from eth_account import Account
 
 from moonwalk.blocks.main import Lendingblock
 
@@ -18,9 +18,7 @@ async def test_lnd_create_wallet(fee_mocker):
     assert Account.privateKeyToAccount(priv1).address == addr1
 
     priv2 = (
-        '0xb25c7db31feed9122727bf0939dc769'
-        'a96564b2de4c4726d035b36ecf1e5b364'
-    )
+        '0xb25c7db31feed9122727bf0939dc769a96564b2de4c4726d035b36ecf1e5b364')
     addr2 = '0x5ce9454909639D2D17A3F753ce7d93fa0b9aB12E'
     assert Account.privateKeyToAccount(priv2).address == addr2
 

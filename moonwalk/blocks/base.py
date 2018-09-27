@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from decimal import Decimal as D
+from typing import Dict, Tuple, List
 
 
 class BlockBaseError(Exception):
@@ -21,21 +23,29 @@ class NotEnoughAmountError(BlockBaseError):
     error = 'not_enough_amount'
 
 
-class BaseProxy(ABC):
+class BaseBlock(ABC):
+    CCY: str = None
+    BLOCKS: Dict[str, 'BaseBlock'] = {}
 
-    @classmethod
-    @abstractmethod
-    def validate_addr(cls, addr):
-        pass
-
-    @abstractmethod
-    async def create_wallet(self):
-        pass
-
-    @abstractmethod
-    async def send_money(self, priv, addrs):
-        pass
+    def __init_subclass__(cls, **kwargs):
+        if cls.CCY in BaseBlock.BLOCKS:
+            raise ValueError(f"Block already there for {cls.CCY}")
+        if cls.CCY:
+            BaseBlock.BLOCKS[cls.CCY] = cls()
+        super().__init_subclass__(**kwargs)
 
     @abstractmethod
-    async def get_balance(self, addr):
-        pass
+    def validate_addr(self, addr: str):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def create_wallet(self) -> Tuple[str, str]:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def send_money(self, priv: str, addrs: List[Tuple[str, D]]) -> str:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_balance(self, addr: str) -> D:
+        raise NotImplementedError

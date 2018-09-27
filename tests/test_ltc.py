@@ -2,7 +2,7 @@ from decimal import Decimal as D
 
 from bitcoin.core import COIN
 
-from moonwalk.blocks.main import Litecoin
+from moonwalk.main import Litecoin
 
 
 async def test_basic_ltc_ops(fee_mocker):
@@ -15,8 +15,8 @@ async def test_basic_ltc_ops(fee_mocker):
     assert ltc.validate_addr(addr2)
     assert ltc.validate_addr(addr3)
 
-    await ltc.proxy.post('sendtoaddress', addr1, 100000 / COIN)
-    await ltc.proxy.post('generate', 1)
+    await ltc.post('sendtoaddress', addr1, 100000 / COIN)
+    await ltc.post('generate', 1)
     assert (await ltc.get_balance(addr1)) == D(100000) / COIN
 
     tx_id = await ltc.send_money(
@@ -24,7 +24,7 @@ async def test_basic_ltc_ops(fee_mocker):
         [(addr2, D(5000) / COIN), (addr3, D(15000) / COIN)]
     )
     assert tx_id
-    await ltc.proxy.post('generate', 1)
+    await ltc.post('generate', 1)
 
     # 500 fee splited equally onto 2 recievers:
     assert (await ltc.get_balance(addr1)) == D(100000 - 20000) / COIN

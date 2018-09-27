@@ -1,11 +1,11 @@
 import pycoin
 
-from moonwalk.blocks.main import Bitcoin
+from moonwalk.main import Bitcoin
 
 
 async def test_bitcoin_create_wallet():
     bitcoin = Bitcoin()
-    bitcoin.proxy.NET_WALLET = 'btc'
+    bitcoin.NET_WALLET = 'btc'
     addr1, priv1 = await bitcoin.create_wallet()
 
     assert pycoin.encoding.is_hashed_base58_valid(addr1) is True

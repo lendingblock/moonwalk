@@ -1,24 +1,32 @@
+import logging
 from decimal import Decimal as D
 
 from aiohttp.client import ClientSession
-from eth_account.account import Account
-from eth_utils.address import is_address
-from eth_utils.currency import to_wei, from_wei
+from eth_abi.abi import decode_abi
+from eth_account import Account
+from eth_hash.auto import keccak
+from eth_utils import from_wei, to_checksum_address, is_address
+from eth_utils.currency import to_wei
+from hexbytes.main import HexBytes
 
 from moonwalk import settings
-from .fee import FeeStation
 from .exc import (
     EthereumError,
-    NotEnoughAmountError,
     ReplacementTransactionError,
 )
+from .exc import NotEnoughAmountError
+from .fee import FeeStation
+
+logger = logging.getLogger(__name__)
+DECIMALS = pow(10, 18)
 
 
-class EthereumProxy:
-
+class EthereumGeneric:
     MAX_FEE = 100
     URL = settings.ETH_URL
     NETWORK = 'testnet' if settings.USE_TESTNET else 'mainnet'
+    MIN_GAS = 21000
+    MAX_GAS = 100000
 
     def get_data(self, method, *params):
         return {
@@ -48,7 +56,7 @@ class EthereumProxy:
             return min(self.MAX_FEE, transaction_fee)
         return to_wei(int(settings.ETH_FEE), 'gwei')
 
-    async def get_balance(self, addr):
+    async def get_eth_balance(self, addr):
         balance = await self.post('eth_getBalance', addr, 'latest')
         return D(from_wei(int(balance, 16), 'ether'))
 
@@ -58,6 +66,8 @@ class EthereumProxy:
         addr_to,
         amount,
         nonce,
+        data='',
+        subtract_fee=False,
         max_attempts=10,
     ):
         if max_attempts < 1:
@@ -67,6 +77,8 @@ class EthereumProxy:
             addr_to,
             amount,
             nonce,
+            data,
+            subtract_fee,
         )
         tx_hex = Account.signTransaction(tx_dict, priv).rawTransaction.hex()
         try:
@@ -79,30 +91,45 @@ class EthereumProxy:
                 addr_to,
                 amount,
                 nonce,
+                data,
+                subtract_fee,
                 max_attempts=max_attempts
             )
 
-    async def get_transaction_dict(self, priv, addr_to, amount, nonce):
-        gas = 21000
-        get_code = await self.post('eth_getCode', addr_to, 'latest')
-        if len(get_code) > 3:
-            gas = 50000
+    async def get_transaction_dict(self, priv, addr_to, amount, nonce, data,
+                                   subtract_fee):
+        if data:  # Pull this out.
+            gas = self.MAX_GAS
+        else:
+            get_code = await self.post('eth_getCode', addr_to, 'latest')
+            gas = 50000 if len(get_code) > 3 else self.MIN_GAS
+
         gas_price = await self.get_gas_price()
-        fee = gas * gas_price
-        value = to_wei(amount, 'ether') - fee
+        amount = to_wei(amount, 'ether')
+        if subtract_fee:
+            fee = gas * gas_price
+            amount -= fee
         return {
             'from': Account.privateKeyToAccount(priv).address,
             'to': addr_to,
-            'value': value,
+            'value': amount,
             'gas': gas,
             'gasPrice': gas_price,
+            'data': data,
             'chainId': int(settings.ETH_CHAIN_ID),
-            'nonce': nonce,
+            'nonce': nonce
         }
+
+    def make_lnd_transfer_data(self, addr_to, amount):
+        # Todo: Generalise to any contract.
+        method_hash = self.get_method_hash('transfer')
+        addr_hash = self.get_addr_hash(addr_to)
+        amount_hash = self.get_amount_hash(amount)
+        return method_hash + addr_hash + amount_hash
 
     async def validate_balance(self, priv, addrs):
         addr_from = Account.privateKeyToAccount(priv).address
-        balance = await self.get_balance(addr_from)
+        balance = await self.get_eth_balance(addr_from)
         addr, amount = addrs[0]
         if amount > balance:
             raise NotEnoughAmountError()
@@ -112,12 +139,14 @@ class EthereumProxy:
                                 'pending')
         return int(nonce, 16)
 
-    async def send_money(self, priv, addrs):
+    async def send_eth(self, priv, addrs):
+        # Todo: Move to eth currency class.
         await self.validate_balance(priv, addrs)
         addr_from = Account.privateKeyToAccount(priv).address
         nonce = await self.get_transaction_count(addr_from)
         tx_ids = [
-            await self.send_single_transaction(priv, addr, amount, nonce + i)
+            await self.send_single_transaction(priv, addr, amount, nonce + i,
+                                               subtract_fee=True)
             for i, (addr, amount) in enumerate(addrs)
         ]
         return tx_ids
@@ -127,8 +156,8 @@ class EthereumProxy:
         buffer_addr = Account.privateKeyToAccount(
             settings.BUFFER_ETH_PRIV
         ).address
-        balance = await self.get_balance(addr)
-        return await self.send_money(priv, [(buffer_addr, balance)])
+        balance = await self.get_eth_balance(addr)
+        return await self.send_eth(priv, [(buffer_addr, balance)])
 
     @staticmethod
     def validate_addr(addr):
@@ -136,6 +165,60 @@ class EthereumProxy:
             return addr
 
     @staticmethod
-    def create_wallet():
+    def _create_wallet():
         account = Account().create()
         return account.address, account.privateKey.hex()
+
+    @staticmethod
+    def get_contract_addr():
+        """
+        to make tests mocking easier
+        """
+        return to_checksum_address(settings.LND_CONTRACT_ADDR)
+
+    def get_method_hash(self, method):
+        method_sig = self.get_method_signature(method)
+        if method_sig:
+            return '0x' + keccak(method_sig.encode()).hex()[:8]
+
+    @staticmethod
+    def get_addr_hash(addr):
+        if addr.startswith('0x'):
+            return addr.lower()[2:].zfill(64)
+        return ''
+
+    @staticmethod
+    def get_amount_hash(num):
+        return hex(int(num * DECIMALS))[2:].zfill(64)
+
+    @staticmethod
+    def get_method_signature(method):
+        method_abi_list = [
+            x for x in settings.LND_CONTRACT['abi'] if x.get('name') == method
+        ]
+        if not method_abi_list:
+            return
+        method_abi = method_abi_list[0]
+        method_sig = method
+        method_sig += '('
+        inputs = method_abi.get('inputs')
+        if inputs:
+            for inp in inputs:
+                method_sig += inp['type']
+                if inp is not inputs[-1]:
+                    method_sig += ','
+        method_sig += ')'
+        return method_sig
+
+    async def call_contract_method(self, method, to_int=False,
+                                   to_string=False):
+        contract_address = self.get_contract_addr()
+        result = await self.post('eth_call', {
+            'to': contract_address,
+            'data': self.get_method_hash(method)
+        }, 'latest')
+        if to_int:
+            return int(result, 16)
+        elif to_string:
+            return decode_abi(['string'], HexBytes(result))[0].decode()
+        return result

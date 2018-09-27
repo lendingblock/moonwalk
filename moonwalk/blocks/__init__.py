@@ -1,4 +1,4 @@
-from .main import BaseBlock
+from .base import BaseBlock
 
 
 def get(ccy: str) -> BaseBlock:

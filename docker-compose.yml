@@ -3,7 +3,7 @@ version: '2.1'
 services:
 
   bitcoin:
-    image: ruimarinho/bitcoin-core:0.16.0-alpine
+    image: ruimarinho/bitcoin-core:0.16-alpine
     container_name: bitcoin
     ports:
       - 18443:18443
@@ -13,7 +13,7 @@ services:
     image: uphold/litecoin-core:0.15.1
     container_name: litecoin
     ports:
-     - 19332:19332
+      - 19332:19332
     command: -regtest=1 -printtoconsole -rpcallowip=0.0.0.0/0 -rpcuser=test -rpcpassword=test
 
   bitcoin-cash:

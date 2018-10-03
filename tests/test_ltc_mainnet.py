@@ -1,11 +1,11 @@
 import pycoin
 
-from moonwalk.blocks.main import Litecoin
+from moonwalk.main import Litecoin
 
 
-async def test_litecoin_create_wallet():
+async def test_litecoincreate_wallet():
     ltc = Litecoin()
-    ltc.proxy.NET_WALLET = 'ltc'
+    ltc.NET_WALLET = 'ltc'
     addr1, priv1 = await ltc.create_wallet()
 
     assert pycoin.encoding.is_hashed_base58_valid(addr1) is True

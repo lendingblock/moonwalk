@@ -3,12 +3,12 @@ import re
 import eth_utils
 from eth_account import Account
 
-from moonwalk.blocks.main import Ethereum
+from moonwalk.main import Lendingblock
 
 
-async def test_eth_create_wallet():
-    eth = Ethereum()
-    addr1, priv1 = await eth.create_wallet()
+async def test_lnd_create_wallet(fee_mocker, lnd_helper):
+    lnd = Lendingblock()
+    addr1, priv1 = await lnd.create_wallet()
 
     pattern_address = re.compile('^(0x)[0-9a-fA-F]{40}$')
     pattern_private = re.compile('^(0x)[0-9a-fA-F]{64}$')
@@ -23,48 +23,48 @@ async def test_eth_create_wallet():
     assert Account.privateKeyToAccount(priv2).address == addr2
 
 
-async def test_eth_validate_addr():
-    eth = Ethereum()
+async def test_lnd_validate_addr():
+    lnd = Lendingblock()
 
     # do not pad missing length
-    assert eth.validate_addr('0x0') is None
+    assert lnd.validate_addr('0x0') is None
     # all uppercase valid checksummed
-    assert eth.validate_addr(
+    assert lnd.validate_addr(
         '0x52908400098527886E0F7030069857D2E4169EE7'
         ) == '0x52908400098527886E0F7030069857D2E4169EE7'
     # all lowercase valid checksummed
-    assert eth.validate_addr(
+    assert lnd.validate_addr(
         '0xde709f2102306220921060314715629080e2fb77'
         ) == '0xde709f2102306220921060314715629080e2fb77'
     # normal checksummed address
-    assert eth.validate_addr(
+    assert lnd.validate_addr(
         '0xd3CdA913deB6f67967B99D67aCDFa1712C293601'
         ) == '0xd3CdA913deB6f67967B99D67aCDFa1712C293601'
     # wrong checksummed address
-    assert eth.validate_addr(
+    assert lnd.validate_addr(
         '0xd3cdA913deB6f67967B99D67aCDFa1712C293601'
         ) is None
     # all lowercase
-    assert eth.validate_addr(
+    assert lnd.validate_addr(
         '0xd3cda913deb6f67967b99d67acdfa1712c293601'
         ) == '0xd3cda913deb6f67967b99d67acdfa1712c293601'
     # all uppercase
-    assert eth.validate_addr(
+    assert lnd.validate_addr(
         '0xD3CDA913DEB6F67967B99D67ACDFA1712C293601'
         ) == '0xD3CDA913DEB6F67967B99D67ACDFA1712C293601'
     # starts with 00
-    assert eth.validate_addr(
+    assert lnd.validate_addr(
         '0x00908400098527886E0F7030069857d2e4169eE7'
         ) == '0x00908400098527886E0F7030069857d2e4169eE7'
     # do not pad missing length
-    assert eth.validate_addr(
+    assert lnd.validate_addr(
         '0x908400098527886E0F7030069857d2e4169eE7'
         ) is None
     # ends with 00
-    assert eth.validate_addr(
+    assert lnd.validate_addr(
         '0x52908400098527886e0F7030069857d2E4169e00'
         ) == '0x52908400098527886e0F7030069857d2E4169e00'
     # do not pad missing length
-    assert eth.validate_addr(
+    assert lnd.validate_addr(
         '0x52908400098527886e0F7030069857d2E4169e'
         ) is None

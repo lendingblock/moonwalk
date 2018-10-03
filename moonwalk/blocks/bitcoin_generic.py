@@ -16,14 +16,15 @@ from pycoin.tx.tx_utils import sign_tx
 from pycoin.ui import standard_tx_out_script
 from pywallet.wallet import create_wallet
 
+from moonwalk.blocks.base import BaseBlock
 from .exc import NotEnoughAmountError
 
 
-class BitcoinGenericProxy:
+class BitcoinGeneric(BaseBlock):
     NETWORK = None
     URL = None
-    NET_WALLET = None
     NETCODE = None
+    NET_WALLET = None
 
     def __init__(self):
         SelectParams(self.NETWORK)

@@ -3,7 +3,7 @@ from decimal import Decimal as D
 import pytest
 from eth_utils import to_checksum_address, from_wei
 
-from moonwalk.blocks.main import Ethereum
+from moonwalk.main import Ethereum
 from moonwalk.blocks.exc import NotEnoughAmountError
 
 
@@ -65,7 +65,7 @@ async def test_send_money_contract(eth_helper, fee_mocker):
     assert await eth.get_balance(addr1) == D(10)
 
     # deploy a simple contract that accepts eth
-    tx_hash = await eth_helper.proxy.post('eth_sendTransaction', {
+    tx_hash = await eth_helper.post('eth_sendTransaction', {
         'from': eth_helper.MAIN_ADDR,
         'gas': 4000000,
         'gasPrice': 20,
@@ -100,7 +100,7 @@ async def test_send_money_contract(eth_helper, fee_mocker):
             '45b06de95c945cafcb58eceb5fbd45a892860ac0c5ceae0c50029'
         )
     })
-    receipt = await eth_helper.proxy.post(
+    receipt = await eth_helper.post(
         'eth_getTransactionReceipt',
         tx_hash
     )

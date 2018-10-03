@@ -7,7 +7,7 @@ dotenv.load_dotenv('.test.env')  # noqa
 import pytest
 import uvloop
 
-from moonwalk.blocks.eth import EthereumProxy
+from moonwalk.blocks.eth_generic import EthereumGeneric
 from moonwalk import settings
 
 from eth_utils.currency import to_wei
@@ -16,17 +16,14 @@ from eth_utils.address import to_checksum_address
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
-class GenericEthHelper:
+class GenericEthHelper(EthereumGeneric):
     MAIN_ADDR = to_checksum_address(
         '0x4a6a0f44e165bb2dc9afbc7574f82d2388a52638')
-
-    def __init__(self):
-        self.proxy = EthereumProxy()
 
 
 class EthHelper(GenericEthHelper):
     async def send_money(self, addr, amount):
-        nonce = await self.proxy.post(
+        nonce = await self.post(
             'eth_getTransactionCount',
             self.MAIN_ADDR,
         )
@@ -39,18 +36,18 @@ class EthHelper(GenericEthHelper):
             'chainId': 1,
             'nonce': nonce,
         }
-        return await self.proxy.post('eth_sendTransaction', tx)
+        return await self.post('eth_sendTransaction', tx)
 
 
 class LndHelper(GenericEthHelper):
     async def create_contract(self):
-        tx_hash = await self.proxy.post('eth_sendTransaction', {
+        tx_hash = await self.post('eth_sendTransaction', {
             'from': self.MAIN_ADDR,
             'gas': 4000000,
             'gasPrice': 100,
             'data': settings.LND_CONTRACT['bytecode'],
         })
-        receipt = await self.proxy.post(
+        receipt = await self.post(
             'eth_getTransactionReceipt',
             tx_hash
         )
@@ -75,8 +72,8 @@ async def lnd_helper(mocker):
     lnd_helper = LndHelper()
     contract_addr = await lnd_helper.create_contract()
     mocker.patch(
-        'moonwalk.blocks.lnd.LendingblockProxy.get_contract_addr',
-        lambda self: contract_addr,
+        'moonwalk.blocks.eth_generic.EthereumGeneric.get_contract_addr',
+        lambda self: to_checksum_address(contract_addr),
     )
     yield lnd_helper
 
@@ -92,18 +89,18 @@ async def get_gas_price_mock(self):
 @pytest.fixture()
 async def fee_mocker(mocker):
     mocker.patch(
-        'moonwalk.blocks.bitcoin.BitcoinProxy.calc_fee',
+        'moonwalk.main.Bitcoin.calc_fee',
         calc_fee_mock
     )
     mocker.patch(
-        'moonwalk.blocks.ltc.LitecoinProxy.calc_fee',
+        'moonwalk.main.Litecoin.calc_fee',
         calc_fee_mock
     )
     mocker.patch(
-        'moonwalk.blocks.bitcoin_cash.BitcoinCashProxy.calc_fee',
+        'moonwalk.main.BitcoinCash.calc_fee',
         lambda x, y, z: 500
     )
     mocker.patch(
-        'moonwalk.blocks.eth.EthereumProxy.get_gas_price',
+        'moonwalk.blocks.eth_generic.EthereumGeneric.get_gas_price',
         get_gas_price_mock
     )

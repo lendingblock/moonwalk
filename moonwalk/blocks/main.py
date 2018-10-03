@@ -91,7 +91,7 @@ class Dummycoin(BaseBlock):
 
 
 class Bitcoin(BaseBlock):
-    CCY = 'BTC'
+    CCY = 'btc'
 
     def __init__(self):
         self.proxy = BitcoinProxy()
@@ -110,7 +110,7 @@ class Bitcoin(BaseBlock):
 
 
 class Ethereum(BaseBlock):
-    CCY = 'ETH'
+    CCY = 'eth'
 
     def __init__(self):
         self.proxy = EthereumProxy()
@@ -129,7 +129,7 @@ class Ethereum(BaseBlock):
 
 
 class Litecoin(BaseBlock):
-    CCY = 'LTC'
+    CCY = 'ltc'
 
     def __init__(self):
         self.proxy = LitecoinProxy()
@@ -148,7 +148,7 @@ class Litecoin(BaseBlock):
 
 
 class BitcoinCash(BaseBlock):
-    CCY = 'BCH'
+    CCY = 'bch'
 
     def __init__(self):
         self.proxy = BitcoinCashProxy()
@@ -167,7 +167,7 @@ class BitcoinCash(BaseBlock):
 
 
 class Lendingblock(BaseBlock):
-    CCY = 'LND'
+    CCY = 'lnd'
 
     def __init__(self):
         self.proxy = LendingblockProxy()

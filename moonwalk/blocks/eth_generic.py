@@ -192,23 +192,11 @@ class EthereumGeneric:
         return hex(int(num * DECIMALS))[2:].zfill(64)
 
     @staticmethod
-    def get_method_signature(method):
-        method_abi_list = [
-            x for x in settings.LND_CONTRACT['abi'] if x.get('name') == method
-        ]
-        if not method_abi_list:
-            return
-        method_abi = method_abi_list[0]
-        method_sig = method
-        method_sig += '('
-        inputs = method_abi.get('inputs')
-        if inputs:
-            for inp in inputs:
-                method_sig += inp['type']
-                if inp is not inputs[-1]:
-                    method_sig += ','
-        method_sig += ')'
-        return method_sig
+    def get_method_signature(method_name):
+        method_abi = next(x for x in settings.LND_CONTRACT['abi']
+                          if x.get('name') == method_name)
+        args = ','.join(i['type'] for i in method_abi.get('inputs', ()))
+        return f'{method_name}({args})'
 
     async def call_contract_method(self, method, to_int=False,
                                    to_string=False):

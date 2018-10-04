@@ -4,7 +4,6 @@ import json
 
 cd = os.path.dirname
 ROOT_DIR = cd(__file__)
-SECRET_KEY = os.environ.get('SECRET_KEY') or 's0secret'
 
 LITECOIN_FEE = os.environ.get('LITECOIN_FEE') or '10'  # satoshi / byte
 LITECOIN_URL = os.environ.get('LITECOIN_URL')

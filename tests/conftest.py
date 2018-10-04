@@ -10,15 +10,23 @@ import uvloop
 from moonwalk.blocks.eth_generic import EthereumGeneric
 from moonwalk import settings
 
+from eth_keys.datatypes import PublicKey, PrivateKey
 from eth_utils.currency import to_wei
 from eth_utils.address import to_checksum_address
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
+def private_key_to_checksum_address(key):
+    if key.startswith('0x'):
+        key = key[2:]
+    return PublicKey.from_private(
+        PrivateKey(bytes.fromhex(key))
+    ).to_checksum_address()
+
+
 class GenericEthHelper(EthereumGeneric):
-    MAIN_ADDR = to_checksum_address(
-        '0x4a6a0f44e165bb2dc9afbc7574f82d2388a52638')
+    MAIN_ADDR = private_key_to_checksum_address(settings.BUFFER_ETH_PRIV)
 
 
 class EthHelper(GenericEthHelper):

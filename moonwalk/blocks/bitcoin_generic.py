@@ -16,7 +16,7 @@ from pycoin.tx.tx_utils import sign_tx
 from pycoin.ui import standard_tx_out_script
 from pywallet.wallet import create_wallet
 
-from moonwalk.blocks.base import BaseBlock
+from .base import BaseBlock
 from .exc import NotEnoughAmountError
 
 

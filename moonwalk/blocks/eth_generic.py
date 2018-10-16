@@ -9,12 +9,10 @@ from eth_utils import from_wei, to_checksum_address, is_address
 from eth_utils.currency import to_wei
 from hexbytes.main import HexBytes
 
-from moonwalk import settings
+from .. import settings
 from .exc import (
-    EthereumError,
-    ReplacementTransactionError,
+    EthereumError, ReplacementTransactionError, NotEnoughAmountError
 )
-from .exc import NotEnoughAmountError
 from .fee import FeeStation
 
 logger = logging.getLogger(__name__)

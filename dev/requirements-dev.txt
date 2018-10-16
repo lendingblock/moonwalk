@@ -5,4 +5,3 @@ pytest-cov
 pytest-aiohttp
 flake8
 pytest-mock==1.10.0
-uvloop==0.10.2

@@ -1,7 +1,9 @@
 # testing and linting
 mypy
-pytest==3.6.4
+pytest
 pytest-cov
 pytest-aiohttp
 flake8
-pytest-mock==1.10.0
+pytest-mock
+pipdeptree
+pywallet

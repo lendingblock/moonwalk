@@ -9,12 +9,13 @@ jobs:
       - run:
           name: Run test nodes
           command: make blockchains
-      - run:
-          name: Install Python dependencies
-          command: ./dev/install.sh
+      - run: sleep 5
       - run:
           name: Generate coins
           command: make coins
+      - run:
+          name: Install Python dependencies
+          command: ./dev/install.sh
       - run:
           name: test
           command: make test

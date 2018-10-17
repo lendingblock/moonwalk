@@ -7,3 +7,5 @@ flake8
 pytest-mock
 pipdeptree
 pywallet
+twine
+agile-toolkit

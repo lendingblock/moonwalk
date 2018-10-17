@@ -25,3 +25,18 @@ At the time Moonwalk supports the following cryptocurrencies:
 
 In the future support for some other cryptocurrencies may be added if needed.
 
+## Testing
+
+For testing you need docker and docker-compose installed.
+Launch the blockchain clients
+```
+make blockchain-remove
+```
+Create coins
+```
+make coins
+```
+and run tests
+```
+make tests
+```

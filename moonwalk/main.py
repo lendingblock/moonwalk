@@ -5,19 +5,22 @@ from bitcash import PrivateKeyTestnet, PrivateKey
 from bitcash.network.meta import Unspent
 from bitcash.transaction import estimate_tx_fee, create_p2pkh_transaction
 from bitcoin.core import COIN
+
 from cashaddress.convert import is_valid, to_legacy_address
+
 from eth_account import Account
 from eth_utils import from_wei
+
 from pycoin.key.validate import is_address_valid
 from pycoin.tx import Tx
 
-from moonwalk import utils, settings
-from moonwalk.blocks.base import BaseBlock
-from moonwalk.blocks.bitcoin_generic import BitcoinGeneric
-from moonwalk.blocks.eth_generic import EthereumGeneric
-from moonwalk.blocks.exc import NotEnoughAmountError
-from moonwalk.blocks.fee import FeeStation
-from moonwalk.utils import GeneralError
+from . import settings
+from .blocks.base import BaseBlock
+from .blocks.bitcoin_generic import BitcoinGeneric
+from .blocks.eth_generic import EthereumGeneric
+from .blocks.exc import NotEnoughAmountError
+from .blocks.fee import FeeStation
+from .utils import GeneralError, rand_str
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +53,7 @@ class Dummycoin(BaseBlock):
             return addr
 
     async def create_wallet(self):
-        addr = utils.rand_str()
+        addr = rand_str()
         priv_key = f'1_{addr}'
         self.ADDRESSES[addr] = D(0)
         self.PRIV_KEYS[priv_key] = addr
@@ -73,7 +76,7 @@ class Dummycoin(BaseBlock):
         for addr, amount in addrs:
             self.ADDRESSES[addr] += amount
 
-        return utils.rand_str()
+        return rand_str()
 
     async def get_balance(self, addr):
         if addr not in self.ADDRESSES:

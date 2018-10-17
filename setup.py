@@ -1,15 +1,9 @@
+import os
 from setuptools import setup, find_packages
 
 import moonwalk
 
-import os
-import sys
-from distutils.sysconfig import get_python_lib
-
 NAME = 'moonwalk'
-
-relative_site_packages = get_python_lib().split(sys.prefix+os.sep)[1]
-rel_path = os.path.join(relative_site_packages, NAME)
 
 
 def read(name):
@@ -42,7 +36,7 @@ meta = dict(
     name=NAME,
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=requirements('dev/requirements.txt')[0],
-    data_files=[(rel_path, ['moonwalk/LendingBlockToken.json'])]
+    include_package_data=True
 )
 
 

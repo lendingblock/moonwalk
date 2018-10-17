@@ -4,19 +4,22 @@ from binascii import unhexlify
 from decimal import Decimal as D
 
 from aiohttp import ClientSession
+
 from bitcoin import SelectParams
 from bitcoin.core import COIN, lx, COutPoint
 from bitcoin.core.script import CScript
 from bitcoin.wallet import CBitcoinAddress
+
 from pycoin.key import Key
 from pycoin.tx.Tx import Tx
 from pycoin.tx.Spendable import Spendable
 from pycoin.tx.TxOut import TxOut
 from pycoin.tx.tx_utils import sign_tx
 from pycoin.ui import standard_tx_out_script
+
 from pywallet.wallet import create_wallet
 
-from moonwalk.blocks.base import BaseBlock
+from .base import BaseBlock
 from .exc import NotEnoughAmountError
 
 

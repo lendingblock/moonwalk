@@ -1,5 +1,7 @@
 from eth_utils.address import is_address
+
 from cashaddress.convert import is_valid
+
 from pycoin.key.validate import is_address_valid
 
 

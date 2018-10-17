@@ -5,7 +5,6 @@ import dotenv
 dotenv.load_dotenv('.test.env')  # noqa
 
 import pytest
-import uvloop
 
 from moonwalk.blocks.eth_generic import EthereumGeneric
 from moonwalk import settings
@@ -13,8 +12,6 @@ from moonwalk import settings
 from eth_keys.datatypes import PublicKey, PrivateKey
 from eth_utils.currency import to_wei
 from eth_utils.address import to_checksum_address
-
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
 def private_key_to_checksum_address(key):

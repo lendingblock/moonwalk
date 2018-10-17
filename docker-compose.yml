@@ -8,6 +8,8 @@ services:
     ports:
       - 18443:18443
     command: -regtest=1 -printtoconsole -rpcallowip=0.0.0.0/0 -rpcuser=test -rpcpassword=test
+    env_file:
+      - .test.env
 
   litecoin:
     image: uphold/litecoin-core:0.15.1
@@ -15,6 +17,8 @@ services:
     ports:
       - 19332:19332
     command: -regtest=1 -printtoconsole -rpcallowip=0.0.0.0/0 -rpcuser=test -rpcpassword=test
+    env_file:
+      - .test.env
 
   bitcoin-cash:
     image: uphold/bitcoin-abc:0.17.1-alpine
@@ -22,6 +26,8 @@ services:
     ports:
       - 18332:18332
     command: -regtest=1 -printtoconsole -rpcallowip=0.0.0.0/0 -rpcuser=test -rpcpassword=test
+    env_file:
+      - .test.env
 
   ethereum:
     image: trufflesuite/ganache-cli:v6.1.6
@@ -29,3 +35,5 @@ services:
     ports:
       - 8545:8545
     command: --hostname 0.0.0.0 --account="0x869844d42d74171d1c5e71ecd8964118e68f610af94047fd1e98afb4df1c5e1b,1000000000000000000000000"
+    env_file:
+      - .test.env

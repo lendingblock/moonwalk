@@ -2,19 +2,19 @@ import logging
 from decimal import Decimal as D
 
 from aiohttp.client import ClientSession
+
 from eth_abi.abi import decode_abi
 from eth_account import Account
 from eth_hash.auto import keccak
 from eth_utils import from_wei, to_checksum_address, is_address
 from eth_utils.currency import to_wei
+
 from hexbytes.main import HexBytes
 
-from moonwalk import settings
+from .. import settings
 from .exc import (
-    EthereumError,
-    ReplacementTransactionError,
+    EthereumError, ReplacementTransactionError, NotEnoughAmountError
 )
-from .exc import NotEnoughAmountError
 from .fee import FeeStation
 
 logger = logging.getLogger(__name__)

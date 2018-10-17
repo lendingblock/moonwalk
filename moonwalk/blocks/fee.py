@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
 
 from aiohttp import ClientSession
+
 from eth_utils.currency import to_wei
 
-from moonwalk import settings
+from .. import settings
 
 
 class FeeStation:

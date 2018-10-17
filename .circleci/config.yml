@@ -2,42 +2,23 @@ version: 2
 jobs:
   build:
     machine: true
-    environment:
-      BITCOIN_URL: http://test:test@localhost:18443
-      LITECOIN_URL: http://test:test@localhost:19332
-      BITCOIN_CASH_URL: http://test:test@localhost:18332
-      ETH_URL: http://localhost:8545
-      ETH_CHAIN_ID: 1
-      MAIN_LND_ADDR: 0x4a6a0f44e165bb2dc9afbc7574f82d2388a52638
-      MAIN_LND_PRIV: 0x869844d42d74171d1c5e71ecd8964118e68f610af94047fd1e98afb4df1c5e1b
-      MAIN_ETH_ADDR: 0x4a6a0f44e165bb2dc9afbc7574f82d2388a52638
-      MAIN_ETH_PRIV: 0x869844d42d74171d1c5e71ecd8964118e68f610af94047fd1e98afb4df1c5e1b
-      BUFFER_ETH_PRIV: 0x869844d42d74171d1c5e71ecd8964118e68f610af94047fd1e98afb4df1c5e1b
     steps:
       - checkout
       - run: pyenv install 3.6.3 && pyenv global 3.6.3
       - run: pip3 install docker-compose
       - run:
           name: Run test nodes
-          command: docker-compose up -d
+          command: make blockchains
       - run: sleep 5
       - run:
           name: Generate coins
-          command: |
-            docker-compose exec -T bitcoin bitcoin-cli -rpcport=18443 -rpcuser=test -rpcpassword=test generate 150
-            docker-compose exec -T litecoin litecoin-cli -rpcport=19332 -rpcuser=test -rpcpassword=test generate 150
-            docker-compose exec -T bitcoin-cash bitcoin-cli -rpcport=18332 -rpcuser=test -rpcpassword=test generate 150
+          command: make coins
       - run:
           name: Install Python dependencies
-          command: |
-            pip3 install -r dev/requirements.txt
-            pip3 install -r dev/requirements-dev.txt
-      - run:
-          name: Flake8
-          command: flake8
+          command: ./dev/install.sh
       - run:
           name: test
-          command: pytest --cov
+          command: make test
       - run:
           name: upload coverage
           command: bash <(curl -s https://codecov.io/bash)

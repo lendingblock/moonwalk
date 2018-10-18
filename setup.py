@@ -38,7 +38,7 @@ meta = dict(
     long_description_content_type='text/markdown',
     license="BSD",
     maintainer_email='admin@lendingblock.com',
-    url='https://github.com/lendingblock/moonwalk',
+    url='https://github.com/lendingblock/moonwalking',
     python_requires='>=3.6.0',
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=requirements('dev/requirements.txt')[0],

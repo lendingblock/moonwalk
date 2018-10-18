@@ -1,7 +1,7 @@
 import os
 from setuptools import setup, find_packages
 
-import moonwalk
+import moonwalking
 
 NAME = 'moonwalking'
 
@@ -31,8 +31,8 @@ def requirements(name):
 
 
 meta = dict(
-    version=moonwalk.__version__,
-    description=moonwalk.__doc__,
+    version=moonwalking.__version__,
+    description=moonwalking.__doc__,
     name=NAME,
     long_description=read("readme.md"),
     long_description_content_type='text/markdown',

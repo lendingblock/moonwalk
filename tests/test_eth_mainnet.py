@@ -3,7 +3,7 @@ import re
 import eth_utils
 from eth_account import Account
 
-from moonwalk.main import Ethereum
+from moonwalking.main import Ethereum
 
 
 async def test_eth_create_wallet():

@@ -31,7 +31,7 @@ test:			## Run flake8 & unit tests
 	export PYTHON_ENV=test && pytest --cov
 
 version:		## Display version
-	@python3 -c "import moonwalk; print(moonwalk.__version__)"
+	@python3 -c "import moonwalking; print(moonwalking.__version__)"
 
 codecov:		## Upoload coverage report to codecov
 	codecov --token $(CODECOV_TOKEN)

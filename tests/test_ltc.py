@@ -2,7 +2,7 @@ from decimal import Decimal as D
 
 from bitcoin.core import COIN
 
-from moonwalk.main import Litecoin
+from moonwalking.main import Litecoin
 
 
 async def test_basic_ltc_ops(fee_mocker):

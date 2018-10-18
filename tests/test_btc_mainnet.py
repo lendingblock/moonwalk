@@ -1,6 +1,6 @@
 import pycoin
 
-from moonwalk.main import Bitcoin
+from moonwalking.main import Bitcoin
 
 
 async def test_bitcoin_create_wallet():
@@ -26,7 +26,7 @@ async def test_bitcoin_create_wallet():
 
 async def test_bitcoin_validate_addr(mocker):
     bitcoin = Bitcoin()
-    mocker.patch('moonwalk.settings.USE_TESTNET', None)
+    mocker.patch('moonwalking.settings.USE_TESTNET', None)
 
     # testnet address
     assert bitcoin.validate_addr('mn8eCaT46d8mEn62ussMtE467J4mSgu5zA') is None

@@ -1,6 +1,6 @@
 import pycoin
 
-from moonwalk.main import Litecoin
+from moonwalking.main import Litecoin
 
 
 async def test_litecoincreate_wallet():
@@ -24,7 +24,7 @@ async def test_litecoincreate_wallet():
 
 async def test_litecoin_validate_addr(mocker):
     ltc = Litecoin()
-    mocker.patch('moonwalk.settings.USE_TESTNET', None)
+    mocker.patch('moonwalking.settings.USE_TESTNET', None)
 
     # testnet address
     assert ltc.validate_addr('mn8eCaT46d8mEn62ussMtE467J4mSgu5zA') is None

@@ -3,8 +3,8 @@ from decimal import Decimal as D
 import pytest
 from bitcoin.core import COIN
 
-from moonwalk.main import Bitcoin
-from moonwalk.blocks.exc import NotEnoughAmountError
+from moonwalking.main import Bitcoin
+from moonwalking.blocks.exc import NotEnoughAmountError
 
 
 async def test_basic_bitcoin_ops(fee_mocker):

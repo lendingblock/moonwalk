@@ -8,6 +8,12 @@ clean:			## remove python cache files
 	find . -name '__pycache__' | xargs rm -rf
 	find . -name '*.pyc' -delete
 	rm -rf build
+	rm -rf dist
+	rm -rf .pytest_cache
+	rm -rf *.egg-info
+
+bundles:			## build bundles
+	@python setup.py sdist bdist_wheel
 
 blockchains:		## Starts blockchain clients in daemon mode
 	docker-compose up -d

@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 import moonwalk
 
-NAME = 'moonwalk'
+NAME = 'moonwalking'
 
 
 def read(name):
@@ -34,9 +34,27 @@ meta = dict(
     version=moonwalk.__version__,
     description=moonwalk.__doc__,
     name=NAME,
+    long_description=read("readme.md"),
+    long_description_content_type='text/markdown',
+    license="BSD",
+    maintainer_email='admin@lendingblock.com',
+    url='https://github.com/lendingblock/moonwalk',
+    python_requires='>=3.6.0',
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=requirements('dev/requirements.txt')[0],
-    include_package_data=True
+    include_package_data=True,
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Web Environment',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Topic :: Utilities'
+    ]
 )
 
 

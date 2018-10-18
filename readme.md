@@ -1,21 +1,21 @@
-# Moonwalk
+# Moonwalking
 
 
-[![PyPI version](https://badge.fury.io/py/moonwalk.svg)](https://badge.fury.io/py/moonwalk)
+[![PyPI version](https://badge.fury.io/py/moonwalking.svg)](https://badge.fury.io/py/moonwalking)
 
-[![CircleCI](https://circleci.com/gh/lendingblock/moonwalk.svg?style=svg)](https://circleci.com/gh/lendingblock/moonwalk)
+[![CircleCI](https://circleci.com/gh/lendingblock/moonwalking.svg?style=svg)](https://circleci.com/gh/lendingblock/moonwalking)
 
-[![codecov](https://codecov.io/gh/lendingblock/moonwalk/branch/master/graph/badge.svg)](https://codecov.io/gh/lendingblock/moonwalk)
+[![codecov](https://codecov.io/gh/lendingblock/moonwalking/branch/master/graph/badge.svg)](https://codecov.io/gh/lendingblock/moonwalking)
 
 
-Moonwalk is an open-source library that provides the following functionality:
+Moonwalking is an open-source library that provides the following functionality:
   - creating wallets
   - validating addresses
   - checking balance
   - sending money by creating transactions
 
 
-At the time Moonwalk supports the following cryptocurrencies:
+At the time Moonwalking supports the following cryptocurrencies:
   - Bitcoin (BTC)
   - Bitcoin Cash (BCH)
   - Litecoin (LTC)

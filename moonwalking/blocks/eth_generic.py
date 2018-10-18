@@ -16,12 +16,13 @@ from .exc import (
     EthereumError, ReplacementTransactionError, NotEnoughAmountError
 )
 from .fee import FeeStation
+from .base import BaseBlock
 
 logger = logging.getLogger(__name__)
 DECIMALS = pow(10, 18)
 
 
-class EthereumGeneric:
+class EthereumGeneric(BaseBlock):
     MAX_FEE = 100
     URL = settings.ETH_URL
     NETWORK = 'testnet' if settings.USE_TESTNET else 'mainnet'
@@ -159,13 +160,11 @@ class EthereumGeneric:
         balance = await self.get_eth_balance(addr)
         return await self.send_eth(priv, [(buffer_addr, balance)])
 
-    @staticmethod
-    def validate_addr(addr):
+    def validate_addr(self, addr):
         if is_address(addr):
             return addr
 
-    @staticmethod
-    def _create_wallet():
+    def create_addr(self):
         account = Account().create()
         return account.address, account.privateKey.hex()
 

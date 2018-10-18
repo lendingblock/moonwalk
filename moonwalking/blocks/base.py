@@ -28,14 +28,22 @@ class BaseBlock(ABC):
     BLOCKS: Dict[str, 'BaseBlock'] = {}
 
     def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.register()
+
+    @classmethod
+    def register(cls):
         if cls.CCY in BaseBlock.BLOCKS:
             raise ValueError(f"Block already there for {cls.CCY}")
         if cls.CCY:
             BaseBlock.BLOCKS[cls.CCY] = cls()
-        super().__init_subclass__(**kwargs)
 
     @abstractmethod
     def validate_addr(self, addr: str):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def create_addr(self) -> Tuple[str, str]:
         raise NotImplementedError
 
     @abstractmethod

@@ -46,11 +46,14 @@ class BitcoinGeneric(BaseBlock):
                 resp_dict = await res.json()
                 return resp_dict['result']
 
-    async def create_wallet(self):
+    def create_addr(self):
         wallet = create_wallet(self.NET_WALLET)
-        addr = wallet['address']
+        return wallet['address'], wallet['wif']
+
+    async def create_wallet(self):
+        addr, pk = self.create_addr()
         await self.post('importaddress', addr, '', False)
-        return addr, wallet['wif']
+        return addr, pk
 
     async def get_listunspent_for_addr(self, addr, confirmations=1):
         res = await self.post('listunspent', confirmations, 9999999, [addr])

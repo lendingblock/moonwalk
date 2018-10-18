@@ -1,5 +1,5 @@
 [run]
-source = moonwalk
+source = moonwalking
 
 [html]
 directory = build/coverage/html

@@ -6,7 +6,7 @@ dotenv.load_dotenv('.test.env')  # noqa
 
 import pytest
 
-from moonwalking.blocks.eth_generic import EthereumGeneric
+from moonwalking import main
 from moonwalking import settings
 
 from eth_keys.datatypes import PublicKey, PrivateKey
@@ -22,11 +22,15 @@ def private_key_to_checksum_address(key):
     ).to_checksum_address()
 
 
-class GenericEthHelper(EthereumGeneric):
+class EthHelperMixin:
     MAIN_ADDR = private_key_to_checksum_address(settings.BUFFER_ETH_PRIV)
 
+    @classmethod
+    def register(cls):
+        pass
 
-class EthHelper(GenericEthHelper):
+
+class EthHelper(EthHelperMixin, main.Ethereum):
     async def send_money(self, addr, amount):
         nonce = await self.post(
             'eth_getTransactionCount',
@@ -44,7 +48,7 @@ class EthHelper(GenericEthHelper):
         return await self.post('eth_sendTransaction', tx)
 
 
-class LndHelper(GenericEthHelper):
+class LndHelper(EthHelperMixin, main.Lendingblock):
     async def create_contract(self):
         tx_hash = await self.post('eth_sendTransaction', {
             'from': self.MAIN_ADDR,

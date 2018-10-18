@@ -4,6 +4,7 @@ import eth_utils
 from eth_account import Account
 
 from moonwalking.main import Lendingblock
+from moonwalking import wallets
 
 
 async def test_lnd_create_wallet(fee_mocker, lnd_helper):
@@ -29,7 +30,8 @@ async def test_lnd_validate_addr():
     # do not pad missing length
     assert lnd.validate_addr('0x0') is None
     # all uppercase valid checksummed
-    assert lnd.validate_addr(
+    assert wallets.validate_addr(
+        'lnd',
         '0x52908400098527886E0F7030069857D2E4169EE7'
         ) == '0x52908400098527886E0F7030069857D2E4169EE7'
     # all lowercase valid checksummed

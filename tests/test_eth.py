@@ -3,13 +3,20 @@ from decimal import Decimal as D
 import pytest
 from eth_utils import to_checksum_address, from_wei
 
+from moonwalking import wallets
 from moonwalking.main import Ethereum
 from moonwalking.blocks.exc import NotEnoughAmountError
 
 
+def test_create_addr():
+    addr, pk = wallets.create_addr('eth')
+    assert addr
+    assert pk
+
+
 async def test_not_enough_amount(eth_helper):
     eth = Ethereum()
-    addr1, priv1 = await eth.create_wallet()
+    addr1, priv1 = await wallets.create_wallet('eth')
     addr2, priv2 = await eth.create_wallet()
 
     assert await eth.get_balance(addr1) == D(0)

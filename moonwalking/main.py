@@ -25,6 +25,7 @@ from .utils import GeneralError, rand_str
 logger = logging.getLogger(__name__)
 
 DECIMALS = pow(10, 18)  # Todo: Rename me pls.
+BLOCKS = BaseBlock.BLOCKS
 
 
 class BlockError(Exception):
@@ -52,12 +53,15 @@ class Dummycoin(BaseBlock):
         if addr in self.ADDRESSES:
             return addr
 
-    async def create_wallet(self):
+    def create_addr(self):
         addr = rand_str()
         priv_key = f'1_{addr}'
         self.ADDRESSES[addr] = D(0)
         self.PRIV_KEYS[priv_key] = addr
         return addr, priv_key
+
+    async def create_wallet(self):
+        return self.create_addr()
 
     async def send_money(self, priv, addrs):
         for addr, amount in addrs:
@@ -181,10 +185,9 @@ class BitcoinCash(BitcoinGeneric):
         )))
         return self.normalize_decimal(d)
 
-    async def create_wallet(self):
+    def create_addr(self):
         key = self.KEY_CLASS()
         addr = to_legacy_address(key.address)
-        await self.post('importaddress', addr, '', False)
         return addr, key.to_wif()
 
     @staticmethod
@@ -231,7 +234,7 @@ class Ethereum(EthereumGeneric):
         return await self.get_eth_balance(addr)
 
     async def create_wallet(self):
-        return self._create_wallet()
+        return self.create_addr()
 
     async def send_money(self, priv, addrs):
         return await self.send_eth(priv, addrs)
@@ -263,7 +266,7 @@ class Lendingblock(EthereumGeneric):
         return D(int(result, 16) / DECIMALS)
 
     async def create_wallet(self):
-        addr, priv = self._create_wallet()
+        addr, priv = self.create_addr()
         price = await self.get_gas_price()
         single_tx_price = price * self.MAX_GAS
         single_tx_price = from_wei(single_tx_price, 'ether')

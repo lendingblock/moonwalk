@@ -1,7 +1,7 @@
-include moonwalk/LendingBlockToken.json
+include moonwalking/LendingBlockToken.json
 include MANIFEST.in
 include readme.md
 graft dev
 graft tests
-graft moonwalk
+graft moonwalking
 global-exclude *.pyc

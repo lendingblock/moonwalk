@@ -8,6 +8,12 @@ clean:			## remove python cache files
 	find . -name '__pycache__' | xargs rm -rf
 	find . -name '*.pyc' -delete
 	rm -rf build
+	rm -rf dist
+	rm -rf .pytest_cache
+	rm -rf *.egg-info
+
+bundles:			## build bundles
+	@python setup.py sdist bdist_wheel
 
 blockchains:		## Starts blockchain clients in daemon mode
 	docker-compose up -d
@@ -25,7 +31,7 @@ test:			## Run flake8 & unit tests
 	export PYTHON_ENV=test && pytest --cov
 
 version:		## Display version
-	@python3 -c "import moonwalk; print(moonwalk.__version__)"
+	@python3 -c "import moonwalking; print(moonwalking.__version__)"
 
 codecov:		## Upoload coverage report to codecov
 	codecov --token $(CODECOV_TOKEN)

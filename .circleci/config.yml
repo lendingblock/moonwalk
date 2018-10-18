@@ -35,7 +35,7 @@ jobs:
           command: agilekit git validate
       - run:
           name: build bundles
-          command: sudo python setup.py sdist bdist_wheel
+          command: sudo make bundles
       - run:
           name: upload release
           command: twine upload dist/* --username lsbardel --password $PYPI_PASSWORD

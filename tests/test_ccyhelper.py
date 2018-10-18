@@ -1,4 +1,4 @@
-from moonwalk.blocks.ccyhelper import CcyHelper
+from moonwalking.blocks.ccyhelper import CcyHelper
 
 
 def test_ccyhelper():

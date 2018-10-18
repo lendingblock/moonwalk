@@ -6,8 +6,8 @@ dotenv.load_dotenv('.test.env')  # noqa
 
 import pytest
 
-from moonwalk.blocks.eth_generic import EthereumGeneric
-from moonwalk import settings
+from moonwalking.blocks.eth_generic import EthereumGeneric
+from moonwalking import settings
 
 from eth_keys.datatypes import PublicKey, PrivateKey
 from eth_utils.currency import to_wei
@@ -77,7 +77,7 @@ async def lnd_helper(mocker):
     lnd_helper = LndHelper()
     contract_addr = await lnd_helper.create_contract()
     mocker.patch(
-        'moonwalk.blocks.eth_generic.EthereumGeneric.get_contract_addr',
+        'moonwalking.blocks.eth_generic.EthereumGeneric.get_contract_addr',
         lambda self: to_checksum_address(contract_addr),
     )
     yield lnd_helper
@@ -94,18 +94,18 @@ async def get_gas_price_mock(self):
 @pytest.fixture()
 async def fee_mocker(mocker):
     mocker.patch(
-        'moonwalk.main.Bitcoin.calc_fee',
+        'moonwalking.main.Bitcoin.calc_fee',
         calc_fee_mock
     )
     mocker.patch(
-        'moonwalk.main.Litecoin.calc_fee',
+        'moonwalking.main.Litecoin.calc_fee',
         calc_fee_mock
     )
     mocker.patch(
-        'moonwalk.main.BitcoinCash.calc_fee',
+        'moonwalking.main.BitcoinCash.calc_fee',
         lambda x, y, z: 500
     )
     mocker.patch(
-        'moonwalk.blocks.eth_generic.EthereumGeneric.get_gas_price',
+        'moonwalking.blocks.eth_generic.EthereumGeneric.get_gas_price',
         get_gas_price_mock
     )

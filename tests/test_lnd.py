@@ -2,7 +2,7 @@ from decimal import Decimal as D
 
 from eth_account import Account
 
-from moonwalk.main import Lendingblock
+from moonwalking.main import Lendingblock
 
 
 PRIV_KEY = '0x869844d42d74171d1c5e71ecd8964118e68f610af94047fd1e98afb4df1c5e1b'

@@ -3,7 +3,7 @@ import re
 import eth_utils
 from eth_account import Account
 
-from moonwalk.main import Lendingblock
+from moonwalking.main import Lendingblock
 
 
 async def test_lnd_create_wallet(fee_mocker, lnd_helper):

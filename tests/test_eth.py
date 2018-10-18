@@ -3,8 +3,8 @@ from decimal import Decimal as D
 import pytest
 from eth_utils import to_checksum_address, from_wei
 
-from moonwalk.main import Ethereum
-from moonwalk.blocks.exc import NotEnoughAmountError
+from moonwalking.main import Ethereum
+from moonwalking.blocks.exc import NotEnoughAmountError
 
 
 async def test_not_enough_amount(eth_helper):

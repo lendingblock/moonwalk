@@ -23,6 +23,10 @@ from .base import BaseBlock
 from .exc import NotEnoughAmountError
 
 
+def to_string(v):
+    return v.decode('utf-8') if isinstance(v, bytes) else v
+
+
 class BitcoinGeneric(BaseBlock):
     NETWORK = None
     URL = None
@@ -48,7 +52,7 @@ class BitcoinGeneric(BaseBlock):
 
     def create_addr(self):
         wallet = create_wallet(self.NET_WALLET)
-        return wallet['address'], wallet['wif']
+        return to_string(wallet['address']), to_string(wallet['wif'])
 
     async def create_wallet(self):
         addr, pk = self.create_addr()

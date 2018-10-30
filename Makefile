@@ -28,7 +28,8 @@ coins:			## Generate Coins
 
 test:			## Run flake8 & unit tests
 	flake8
-	export PYTHON_ENV=test && pytest --cov
+	export USET_TESTNETS=1 && pytest
+	export USET_TESTNETS=0 && pytest --cov
 
 version:		## Display version
 	@python3 -c "import moonwalking; print(moonwalking.__version__)"

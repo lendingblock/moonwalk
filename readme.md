@@ -30,7 +30,7 @@ In the future support for some other cryptocurrencies may be added if needed.
 For testing you need docker and docker-compose installed.
 Launch the blockchain clients
 ```
-make blockchain-remove
+make blockchains-remove
 ```
 Create coins
 ```

@@ -5,16 +5,24 @@ from bitcoin.core import COIN
 from cashaddress.convert import to_cash_address
 
 from moonwalking.main import BitcoinCash
+from moonwalking import wallets
 from moonwalking.blocks.exc import NotEnoughAmountError
+from moonwalking.wallets import create_addr
+
+
+def test_create_addr(fee_mocker):
+    addr, priv = create_addr('bch')
+    assert isinstance(addr, str)
+    assert isinstance(priv, str)
 
 
 async def test_basic_bitcoin_cash_ops(fee_mocker):
     bitcoin_cash = BitcoinCash()
-    addr1, priv1 = await bitcoin_cash.create_wallet()
+    addr1, priv1 = await wallets.create_wallet('bch')
     addr2, priv2 = await bitcoin_cash.create_wallet()
     addr3, priv3 = await bitcoin_cash.create_wallet()
 
-    assert bitcoin_cash.validate_addr(addr1)
+    assert wallets.validate_addr('bch', addr1)
     assert bitcoin_cash.validate_addr(addr2)
     assert bitcoin_cash.validate_addr(addr3)
 

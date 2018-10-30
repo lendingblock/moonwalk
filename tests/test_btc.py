@@ -5,6 +5,13 @@ from bitcoin.core import COIN
 
 from moonwalking.main import Bitcoin
 from moonwalking.blocks.exc import NotEnoughAmountError
+from moonwalking.wallets import create_addr
+
+
+def test_create_addr(fee_mocker):
+    addr, priv = create_addr('btc')
+    assert isinstance(addr, str)
+    assert isinstance(priv, str)
 
 
 async def test_basic_bitcoin_ops(fee_mocker):

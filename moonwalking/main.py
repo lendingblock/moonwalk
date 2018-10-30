@@ -16,7 +16,7 @@ from pycoin.tx import Tx
 
 from . import settings
 from .blocks.base import BaseBlock
-from .blocks.bitcoin_generic import BitcoinGeneric
+from .blocks.bitcoin_generic import BitcoinGeneric, to_string
 from .blocks.eth_generic import EthereumGeneric
 from .blocks.exc import NotEnoughAmountError
 from .blocks.fee import FeeStation
@@ -142,15 +142,15 @@ class BitcoinCash(BitcoinGeneric):
 
     def validate_addr(self, addr):
         if is_valid(addr):
-            return to_legacy_address(addr)
+            return self.to_legacy_address(addr)
 
     async def send_money(self, priv, addrs):
         key = self.KEY_CLASS(priv)
-        addr_from = to_legacy_address(key.address)
+        addr_from = self.to_legacy_address(key.address)
         unspent_obj_list = await self._get_obj_unspent_list(addr_from)
 
         payables = [
-            (to_legacy_address(addr), amount * COIN)
+            (self.to_legacy_address(addr), amount * COIN)
             for addr, amount in addrs
         ]
         total_out = sum(amount for addr, amount in payables)
@@ -187,8 +187,7 @@ class BitcoinCash(BitcoinGeneric):
 
     def create_addr(self):
         key = self.KEY_CLASS()
-        addr = to_legacy_address(key.address)
-        return addr, key.to_wif()
+        return self.to_legacy_address(key.address), to_string(key.to_wif())
 
     @staticmethod
     def calc_fee(n_in, n_out):
@@ -200,7 +199,7 @@ class BitcoinCash(BitcoinGeneric):
         )
 
     async def _get_raw_unspent_list(self, addr, confirmations=1):
-        addr = to_legacy_address(addr)
+        addr = self.to_legacy_address(addr)
         list_unspent = await self.post(
             'listunspent',
             confirmations,
@@ -221,6 +220,9 @@ class BitcoinCash(BitcoinGeneric):
             )
             for unspent in unspent_list
         ]
+
+    def to_legacy_address(self, addr):
+        return to_string(to_legacy_address(addr))
 
     @staticmethod
     def normalize_decimal(d):

@@ -2,6 +2,7 @@
 
 
 [![PyPI version](https://badge.fury.io/py/moonwalking.svg)](https://badge.fury.io/py/moonwalking)
+[![Python versions](https://img.shields.io/pypi/pyversions/moonwalking.svg)](https://pypi.org/project/moonwalking)
 
 [![CircleCI](https://circleci.com/gh/lendingblock/moonwalking.svg?style=svg)](https://circleci.com/gh/lendingblock/moonwalking)
 

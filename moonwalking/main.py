@@ -1,5 +1,6 @@
 import logging
 from decimal import Decimal as D
+from typing import List, Tuple
 
 from bitcash import PrivateKeyTestnet, PrivateKey
 from bitcash.network.meta import Unspent
@@ -63,7 +64,12 @@ class Dummycoin(BaseBlock):
     async def create_wallet(self):
         return self.create_addr()
 
-    async def send_money(self, priv, addrs):
+    async def get_balance(self, addr):
+        if addr not in self.ADDRESSES:
+            raise WrongAddressError(addr)
+        return self.ADDRESSES[addr]
+
+    async def build_tx(self, priv: str, addrs: List[Tuple[str, D]]):
         for addr, amount in addrs:
             if not self.validate_addr(addr):
                 raise WrongAddressError(addr)
@@ -82,10 +88,11 @@ class Dummycoin(BaseBlock):
 
         return rand_str()
 
-    async def get_balance(self, addr):
-        if addr not in self.ADDRESSES:
-            raise WrongAddressError(addr)
-        return self.ADDRESSES[addr]
+    def sign_tx(self, priv, tx):
+        return tx
+
+    async def broadcast_tx(self, tx):
+        return tx
 
 
 class Bitcoin(BitcoinGeneric):
@@ -144,7 +151,8 @@ class BitcoinCash(BitcoinGeneric):
         if is_valid(addr):
             return self.to_legacy_address(addr)
 
-    async def send_money(self, priv, addrs):
+    async def build_tx(self, priv: str, addrs: List[Tuple[str, D]]):
+        # Todo: Need to break this up.
         key = self.KEY_CLASS(priv)
         addr_from = self.to_legacy_address(key.address)
         unspent_obj_list = await self._get_obj_unspent_list(addr_from)
@@ -175,8 +183,13 @@ class BitcoinCash(BitcoinGeneric):
         if remaining > 0:
             calc_addrs.append((addr_from, remaining))
 
-        tx_hex = create_p2pkh_transaction(key, unspent_obj_list, calc_addrs)
-        return await self.post('sendrawtransaction', tx_hex)
+        return create_p2pkh_transaction(key, unspent_obj_list, calc_addrs)
+
+    def sign_tx(self, priv, tx):
+        return tx
+
+    async def broadcast_tx(self, tx):
+        return await self.post('sendrawtransaction', tx)
 
     async def get_balance(self, addr):
         unspent_list = await self._get_raw_unspent_list(addr)
@@ -238,25 +251,10 @@ class Ethereum(EthereumGeneric):
     async def create_wallet(self):
         return self.create_addr()
 
-    async def send_money(self, priv, addrs):
-        return await self.send_eth(priv, addrs)
-
 
 class Lendingblock(EthereumGeneric):
     CCY = 'lnd'
     LND_WALLETS_TOPUP_TRANS_NO = int(settings.LND_WALLETS_TOPUP_TRANS_NO)
-
-    async def send_money(self, priv, addrs):
-        addr_from = Account.privateKeyToAccount(priv).address
-        nonce = await self.get_transaction_count(addr_from)
-        contract_addr = self.get_contract_addr()
-        tx_ids = []
-        for i, (addr, amount) in enumerate(addrs):
-            data = self.make_lnd_transfer_data(addr, amount)
-            tx_id = await self.send_single_transaction(priv, contract_addr, 0,
-                                                       nonce + i, data)
-            tx_ids.append(tx_id)
-        return tx_ids
 
     async def get_balance(self, addr):
         method_hash = self.get_method_hash('balanceOf')
@@ -281,3 +279,20 @@ class Lendingblock(EthereumGeneric):
             raise GeneralError("not enough eth in buffer wallet")
 
         return addr, priv
+
+    async def build_tx(self, priv: str, addrs: List[Tuple[str, D]]):
+        # Todo: Deduplicate with EthereumGeneric.build_tx.
+        addr_from = Account.privateKeyToAccount(priv).address
+        nonce = await self.get_transaction_count(addr_from)
+        contract_addr = self.get_contract_addr()
+        return [
+            (await self.get_transaction_dict(
+                priv,
+                contract_addr,
+                0,
+                nonce + i,
+                self.make_lnd_transfer_data(addr, amount),
+                False
+            ))
+            for i, (addr, amount) in enumerate(addrs)
+        ]

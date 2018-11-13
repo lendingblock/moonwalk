@@ -40,20 +40,33 @@ class BaseBlock(ABC):
 
     @abstractmethod
     def validate_addr(self, addr: str):
-        raise NotImplementedError
+        pass
 
     @abstractmethod
     async def create_addr(self) -> Tuple[str, str]:
-        raise NotImplementedError
+        pass
 
     @abstractmethod
     async def create_wallet(self) -> Tuple[str, str]:
-        raise NotImplementedError
+        pass
+
+    async def send_money(self, priv: str, addrs: List[Tuple[str, D]]) -> str:
+        tx = await self.build_tx(priv, addrs)
+        signed = self.sign_tx(priv, tx)
+        return await self.broadcast_tx(signed)
 
     @abstractmethod
-    async def send_money(self, priv: str, addrs: List[Tuple[str, D]]) -> str:
-        raise NotImplementedError
+    async def build_tx(self, priv: str, addrs: List[Tuple[str, D]]):
+        pass
+
+    @abstractmethod
+    def sign_tx(self, priv, tx):
+        pass
+
+    @abstractmethod
+    async def broadcast_tx(self, tx):
+        pass
 
     @abstractmethod
     async def get_balance(self, addr: str) -> D:
-        raise NotImplementedError
+        pass

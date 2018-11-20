@@ -4,7 +4,7 @@ import pytest
 from eth_utils.address import to_checksum_address
 from eth_utils.currency import to_wei
 
-from moonwalking.testing import EthHelper, LndHelper
+from moonwalking.testing import create_lnd_contract
 
 
 @pytest.fixture(autouse=True)
@@ -16,14 +16,8 @@ def loop():
 
 
 @pytest.fixture()
-def eth_helper():
-    yield EthHelper()
-
-
-@pytest.fixture()
 async def lnd_helper(mocker):
-    lnd_helper = LndHelper()
-    contract_addr = await lnd_helper.create_contract()
+    contract_addr = await create_lnd_contract()
     mocker.patch(
         'moonwalking.blocks.eth_generic.EthereumGeneric.get_contract_addr',
         lambda self: to_checksum_address(contract_addr),

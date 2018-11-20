@@ -3,12 +3,12 @@ from decimal import Decimal as D
 from eth_account import Account
 
 from moonwalking.main import Lendingblock
-
+from moonwalking.testing import send_eth
 
 PRIV_KEY = '0x869844d42d74171d1c5e71ecd8964118e68f610af94047fd1e98afb4df1c5e1b'
 
 
-async def test_lnd(eth_helper, lnd_helper, fee_mocker):
+async def test_lnd(lnd_helper, fee_mocker):
     lnd = Lendingblock()
     account = Account.privateKeyToAccount(PRIV_KEY).address
 
@@ -44,7 +44,7 @@ async def test_lnd(eth_helper, lnd_helper, fee_mocker):
     assert lnd.validate_addr(addr3)
 
     # we need some ETH to pay transaction fees
-    assert await eth_helper.send_money(addr1, D(1))
+    assert await send_eth(addr1, D(1))
 
     tx_ids = await lnd.send_money(
         PRIV_KEY,

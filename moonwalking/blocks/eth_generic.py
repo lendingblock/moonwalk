@@ -1,5 +1,6 @@
 import logging
 from decimal import Decimal as D
+from typing import List, Tuple
 
 from aiohttp.client import ClientSession
 
@@ -61,42 +62,6 @@ class EthereumGeneric(BaseBlock):
         balance = await self.post('eth_getBalance', addr, 'latest')
         return D(from_wei(int(balance, 16), 'ether'))
 
-    async def send_single_transaction(
-        self,
-        priv,
-        addr_to,
-        amount,
-        nonce,
-        data='',
-        subtract_fee=False,
-        max_attempts=10,
-    ):
-        if max_attempts < 1:
-            return
-        tx_dict = await self.get_transaction_dict(
-            priv,
-            addr_to,
-            amount,
-            nonce,
-            data,
-            subtract_fee,
-        )
-        tx_hex = Account.signTransaction(tx_dict, priv).rawTransaction.hex()
-        try:
-            return await self.post('eth_sendRawTransaction', tx_hex)
-        except ReplacementTransactionError:
-            max_attempts -= 1
-            nonce += 1
-            return await self.send_single_transaction(
-                priv,
-                addr_to,
-                amount,
-                nonce,
-                data,
-                subtract_fee,
-                max_attempts=max_attempts
-            )
-
     async def get_transaction_dict(self, priv, addr_to, amount, nonce, data,
                                    subtract_fee):
         if data:  # Pull this out.
@@ -131,34 +96,14 @@ class EthereumGeneric(BaseBlock):
     async def validate_balance(self, priv, addrs):
         addr_from = Account.privateKeyToAccount(priv).address
         balance = await self.get_eth_balance(addr_from)
-        addr, amount = addrs[0]
-        if amount > balance:
+        total_amount = sum(amount for addr, amount in addrs)
+        if total_amount > balance:
             raise NotEnoughAmountError()
 
     async def get_transaction_count(self, addr_from):
         nonce = await self.post('eth_getTransactionCount', addr_from,
                                 'pending')
         return int(nonce, 16)
-
-    async def send_eth(self, priv, addrs):
-        # Todo: Move to eth currency class.
-        await self.validate_balance(priv, addrs)
-        addr_from = Account.privateKeyToAccount(priv).address
-        nonce = await self.get_transaction_count(addr_from)
-        tx_ids = [
-            await self.send_single_transaction(priv, addr, amount, nonce + i,
-                                               subtract_fee=True)
-            for i, (addr, amount) in enumerate(addrs)
-        ]
-        return tx_ids
-
-    async def send_all_eth_to_buffer_wallet(self, priv):
-        addr = Account.privateKeyToAccount(priv).address
-        buffer_addr = Account.privateKeyToAccount(
-            settings.BUFFER_ETH_PRIV
-        ).address
-        balance = await self.get_eth_balance(addr)
-        return await self.send_eth(priv, [(buffer_addr, balance)])
 
     def validate_addr(self, addr):
         if is_address(addr):
@@ -209,3 +154,45 @@ class EthereumGeneric(BaseBlock):
         elif to_string:
             return decode_abi(['string'], HexBytes(result))[0].decode()
         return result
+
+    async def send_eth(self, priv, addrs):
+        tx = await EthereumGeneric.build_tx(self, priv, addrs)
+        signed = self.sign_tx(priv, tx)
+        return await self.broadcast_tx(signed)
+
+    async def send_all_eth_to_buffer_wallet(self, priv):
+        addr = Account.privateKeyToAccount(priv).address
+        buffer_addr = Account.privateKeyToAccount(
+            settings.BUFFER_ETH_PRIV
+        ).address
+        balance = await self.get_eth_balance(addr)
+        return await self.send_eth(priv, [(buffer_addr, balance)])
+
+    async def build_tx(self, priv: str, addrs: List[Tuple[str, D]]):
+        await self.validate_balance(priv, addrs)
+        addr_from = Account.privateKeyToAccount(priv).address
+        nonce = await self.get_transaction_count(addr_from)
+        return [
+            (await self.get_transaction_dict(
+                priv,
+                addr,
+                amount,
+                nonce + i,
+                '',
+                subtract_fee=True,
+                ))
+            for i, (addr, amount) in enumerate(addrs)
+        ]
+
+    def sign_tx(self, priv, tx):
+        return [
+            Account.signTransaction(tx_dict, priv).rawTransaction.hex()
+            for tx_dict in tx
+        ]
+
+    async def broadcast_tx(self, tx):
+        # Todo: Retries.
+        return [
+            (await self.post('eth_sendRawTransaction', tx_hex))
+            for tx_hex in tx
+        ]

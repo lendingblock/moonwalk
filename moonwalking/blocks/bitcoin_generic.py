@@ -95,11 +95,7 @@ class BitcoinGeneric(BaseBlock):
         tx.stream(s)
         return len(s.getvalue())
 
-    async def create_and_sign_transaction(
-        self,
-        priv: str,
-        addrs: List[Tuple[str, D]],
-    ) -> str:
+    async def build_tx(self, priv: str, addrs: List[Tuple[str, D]]):
         """
         We distribute fee equally on every recipient by reducing the amount
         of money they will receive. The rest will go back to the sender
@@ -149,10 +145,11 @@ class BitcoinGeneric(BaseBlock):
                     extra_count -= 1
                 if tx_out.coin_value < 1:
                     raise NotEnoughAmountError()
+        return tx
 
+    def sign_tx(self, priv, tx):
         sign_tx(tx, wifs=[priv])
+        return tx
 
+    async def broadcast_tx(self, tx):
         return await self.post('sendrawtransaction', tx.as_hex())
-
-    async def send_money(self, priv, addrs):
-        return await self.create_and_sign_transaction(priv, addrs)

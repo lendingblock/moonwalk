@@ -1,11 +1,12 @@
 from decimal import Decimal as D
-
 import pytest
-from eth_utils import to_checksum_address, from_wei
+
+from eth_utils import from_wei, to_checksum_address
 
 from moonwalking import wallets
-from moonwalking.main import Ethereum
 from moonwalking.blocks.exc import NotEnoughAmountError
+from moonwalking.main import Ethereum
+from moonwalking.testing import ETH_MAIN_ADDR, send_eth
 
 
 def test_create_addr():
@@ -14,26 +15,26 @@ def test_create_addr():
     assert pk
 
 
-async def test_not_enough_amount(eth_helper):
+async def test_not_enough_amount():
     eth = Ethereum()
     addr1, priv1 = await wallets.create_wallet('eth')
     addr2, priv2 = await eth.create_wallet()
 
     assert await eth.get_balance(addr1) == D(0)
-    assert await eth_helper.send_money(addr1, D(1))
+    assert await send_eth(addr1, D(1))
     assert await eth.get_balance(addr1) == D(1)
 
     with pytest.raises(NotEnoughAmountError):
         await eth.send_money(priv1, [(addr2, D(2))])
 
 
-async def test_send_money(eth_helper, fee_mocker):
+async def test_send_money(fee_mocker):
     eth = Ethereum()
     addr1, priv1 = await eth.create_wallet()
     addr2, priv2 = await eth.create_wallet()
 
     assert await eth.get_balance(addr1) == 0
-    assert await eth_helper.send_money(addr1, D(1))
+    assert await send_eth(addr1, D(1))
     assert await eth.get_balance(addr1) == D(1)
     assert await eth.get_balance(addr2) == 0
     assert await eth.send_money(priv1, [(addr2, D('0.5'))])
@@ -42,7 +43,7 @@ async def test_send_money(eth_helper, fee_mocker):
     assert await eth.get_balance(addr2) == D('0.5') - fee
 
 
-async def test_send_money_to_multiple_recipients(eth_helper, fee_mocker):
+async def test_send_money_to_multiple_recipients(fee_mocker):
     eth = Ethereum()
     fee = D('0.00021')
     addr1, priv1 = await eth.create_wallet()
@@ -51,7 +52,7 @@ async def test_send_money_to_multiple_recipients(eth_helper, fee_mocker):
     addr4, priv4 = await eth.create_wallet()
 
     assert await eth.get_balance(addr1) == 0
-    assert await eth_helper.send_money(addr1, D(1))
+    assert await send_eth(addr1, D(1))
     assert await eth.get_balance(addr1) == D(1)
     assert await eth.get_balance(addr2) == 0
     assert await eth.get_balance(addr3) == 0
@@ -64,16 +65,16 @@ async def test_send_money_to_multiple_recipients(eth_helper, fee_mocker):
     assert await eth.get_balance(addr4) == D('0.7') - fee
 
 
-async def test_send_money_contract(eth_helper, fee_mocker):
+async def test_send_money_contract(fee_mocker):
     eth = Ethereum()
     addr1, priv1 = await eth.create_wallet()
 
-    assert await eth_helper.send_money(addr1, D(10))
+    assert await send_eth(addr1, D(10))
     assert await eth.get_balance(addr1) == D(10)
 
     # deploy a simple contract that accepts eth
-    tx_hash = await eth_helper.post('eth_sendTransaction', {
-        'from': eth_helper.MAIN_ADDR,
+    tx_hash = await eth.post('eth_sendTransaction', {
+        'from': ETH_MAIN_ADDR,
         'gas': 4000000,
         'gasPrice': 20,
         'data': (
@@ -107,7 +108,7 @@ async def test_send_money_contract(eth_helper, fee_mocker):
             '45b06de95c945cafcb58eceb5fbd45a892860ac0c5ceae0c50029'
         )
     })
-    receipt = await eth_helper.post(
+    receipt = await eth.post(
         'eth_getTransactionReceipt',
         tx_hash
     )

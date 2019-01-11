@@ -67,7 +67,7 @@ class BitcoinGeneric(BaseBlock):
             unspent['outpoint'] = coutpoint
             unspent['address'] = CBitcoinAddress(unspent['address'])
             unspent['scriptPubKey'] = cscript
-            unspent['amount'] = int(unspent['amount'] * COIN)
+            unspent['amount'] = int(D(str(unspent['amount'])) * COIN)
         return res
 
     async def get_spendable_list_for_addr(self, addr: str) -> List[Spendable]:
@@ -95,7 +95,9 @@ class BitcoinGeneric(BaseBlock):
         tx.stream(s)
         return len(s.getvalue())
 
-    async def build_tx(self, priv: str, addrs: List[Tuple[str, D]]):
+    async def build_tx(
+        self, priv: str, addrs: List[Tuple[str, D]], split_fee=True
+    ):
         """
         We distribute fee equally on every recipient by reducing the amount
         of money they will receive. The rest will go back to the sender
@@ -124,27 +126,49 @@ class BitcoinGeneric(BaseBlock):
 
         fee = await self.calc_fee(tx)
 
-        fee_per_tx_out, extra_count = divmod(fee, len(tx.txs_out) - 1)
-
         total_coin_value = sum(
             spendable.coin_value
             for spendable in tx.unspents
         )
         coins_allocated = sum(tx_out.coin_value for tx_out in tx.txs_out)
 
-        if coins_allocated > total_coin_value:
-            raise NotEnoughAmountError()
+        if split_fee:
+            fee_per_tx_out, extra_count = divmod(fee, len(tx.txs_out) - 1)
 
-        for tx_out in tx.txs_out:
-            if tx_out.address(netcode=self.NETCODE) == addr:
-                tx_out.coin_value = total_coin_value - coins_allocated
-            else:
-                tx_out.coin_value -= fee_per_tx_out
-                if extra_count > 0:
-                    tx_out.coin_value -= 1
-                    extra_count -= 1
-                if tx_out.coin_value < 1:
-                    raise NotEnoughAmountError()
+            if coins_allocated > total_coin_value:
+                raise NotEnoughAmountError(
+                    'Coins allocated exceeds total spendable: '
+                    f'allocated: {coins_allocated}, '
+                    f'spendable: {total_coin_value}'
+                )
+
+            for tx_out in tx.txs_out:
+                if tx_out.address(netcode=self.NETCODE) == addr:
+                    tx_out.coin_value = total_coin_value - coins_allocated
+                else:
+                    tx_out.coin_value -= fee_per_tx_out
+                    if extra_count > 0:
+                        tx_out.coin_value -= 1
+                        extra_count -= 1
+                    if tx_out.coin_value < 1:
+                        raise NotEnoughAmountError(
+                            'Not enough in each output to spread fee evenly: '
+                            f'{tx_out.address} allocated too little'
+                        )
+        else:
+            if (coins_allocated + fee) > total_coin_value:
+                raise NotEnoughAmountError(
+                    'Coins allocated exceeds total spendable: '
+                    f'allocated: {coins_allocated}, '
+                    f'fee: {fee}, '
+                    f'spendable: {total_coin_value}'
+                )
+            for tx_out in tx.txs_out:
+                if tx_out.address(netcode=self.NETCODE) == addr:
+                    tx_out.coin_value = (
+                        total_coin_value - coins_allocated - fee
+                    )
+                    break
         return tx
 
     def sign_tx(self, priv, tx):

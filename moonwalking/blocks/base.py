@@ -50,8 +50,10 @@ class BaseBlock(ABC):
     async def create_wallet(self) -> Tuple[str, str]:
         pass
 
-    async def send_money(self, priv: str, addrs: List[Tuple[str, D]]) -> str:
-        tx = await self.build_tx(priv, addrs)
+    async def send_money(
+        self, priv: str, addrs: List[Tuple[str, D]], split_fee=True
+    ) -> str:
+        tx = await self.build_tx(priv, addrs, split_fee)
         signed = self.sign_tx(priv, tx)
         return await self.broadcast_tx(signed)
 

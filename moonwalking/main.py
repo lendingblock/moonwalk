@@ -69,7 +69,9 @@ class Dummycoin(BaseBlock):
             raise WrongAddressError(addr)
         return self.ADDRESSES[addr]
 
-    async def build_tx(self, priv: str, addrs: List[Tuple[str, D]]):
+    async def build_tx(
+        self, priv: str, addrs: List[Tuple[str, D]], split_fee=True
+    ):
         for addr, amount in addrs:
             if not self.validate_addr(addr):
                 raise WrongAddressError(addr)
@@ -151,7 +153,9 @@ class BitcoinCash(BitcoinGeneric):
         if is_valid(addr):
             return self.to_legacy_address(addr)
 
-    async def build_tx(self, priv: str, addrs: List[Tuple[str, D]]):
+    async def build_tx(
+        self, priv: str, addrs: List[Tuple[str, D]], split_fee=True
+    ):
         # Todo: Need to break this up.
         key = self.KEY_CLASS(priv)
         addr_from = self.to_legacy_address(key.address)
@@ -280,7 +284,9 @@ class Lendingblock(EthereumGeneric):
 
         return addr, priv
 
-    async def build_tx(self, priv: str, addrs: List[Tuple[str, D]]):
+    async def build_tx(
+        self, priv: str, addrs: List[Tuple[str, D]], split_fee=True
+    ):
         # Todo: Deduplicate with EthereumGeneric.build_tx.
         addr_from = Account.privateKeyToAccount(priv).address
         nonce = await self.get_transaction_count(addr_from)

@@ -168,7 +168,9 @@ class EthereumGeneric(BaseBlock):
         balance = await self.get_eth_balance(addr)
         return await self.send_eth(priv, [(buffer_addr, balance)])
 
-    async def build_tx(self, priv: str, addrs: List[Tuple[str, D]]):
+    async def build_tx(
+        self, priv: str, addrs: List[Tuple[str, D]], split_fee=True
+    ):
         await self.validate_balance(priv, addrs)
         addr_from = Account.privateKeyToAccount(priv).address
         nonce = await self.get_transaction_count(addr_from)
